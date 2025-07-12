@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { QuestionCard } from "@/components/question-card";
 import PaginationComponent from "@/components/pagination";
+import Navbar from "@/components/navbar";
 
 // Mock data for development
 const mockQuestions = [
@@ -65,18 +66,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-border bg-card shadow-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-8">
-              <h1 className="text-2xl font-bold text-foreground">StackIt</h1>
-            </div>
-            <Button variant="outline">
-              Login
-            </Button>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-6">
