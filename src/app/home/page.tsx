@@ -35,7 +35,7 @@ export default function HomePage() {
     description: q.description,
     tags: q.tags,
     author: q.author?.name || "Anonymous",
-    answers: 0, // We'll implement answer counting later
+    answers: q.answerCount || 0,
     score: q.upvotes - q.downvotes,
     createdAt: new Date(q.createdAt).toISOString(),
   })) || [];

@@ -107,12 +107,21 @@ export const getQuestions = query({
       .order("desc")
       .paginate({ cursor: null, numItems: limit });
 
-    // Get author information for each question
+    // Get author information and answer count for each question
     const questionsWithAuthors = await Promise.all(
       questions.page.map(async (question) => {
         const author = await ctx.db.get(question.authorId);
+        
+        // Count answers for this question
+        const answerCount = await ctx.db
+          .query("answers")
+          .withIndex("by_question", (q) => q.eq("questionId", question._id))
+          .collect()
+          .then(answers => answers.length);
+        
         return {
           ...question,
+          answerCount,
           author: author ? {
             name: author.name,
             image: author.image,
