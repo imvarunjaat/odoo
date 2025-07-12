@@ -4,8 +4,10 @@ CONVEX_DEPLOYMENT=dev:rightful-stingray-480 # team: punit-singh, project: stacki
 
 NEXT_PUBLIC_CONVEX_URL=https://rightful-stingray-480.convex.cloud 
 
-# IMPORTANT:
+#### IMPORTANT:#####🚨🚨🚨
 please start our project in localhost:3000/auth in local host to see our website as we didnt make the home page yet 
+
+
 
 
 # Team detail:
@@ -19,4 +21,7 @@ om rohilla               : rohillaom10@gmail.com
 
 
 
+Demo video link:
+[odoo- hackathon.zip](https://github.com/user-attachments/files/21196147/odoo-.hackathon.zip)
 
+link: https://youtu.be/Wrv5CW8Jsu8
