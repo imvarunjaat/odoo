@@ -72,9 +72,11 @@ export default function Dashboard() {
           <div className="mb-6 space-y-4 px-4 pt-6">
             {/* Ask Question Button and Search */}
             <div className="flex justify-between items-center gap-4">
-              <Button size="sm">
-                <Plus className="mr-2 h-4 w-4" />
-                Ask New Question
+              <Button asChild size="sm">
+                <a href="/ask-question">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Ask New Question
+                </a>
               </Button>
               
               {/* Search */}
