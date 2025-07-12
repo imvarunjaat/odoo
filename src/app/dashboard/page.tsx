@@ -1,15 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Search, ChevronDown, Plus } from "lucide-react";
+import { Search, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button-component";
 import { Input } from "@/components/ui/input";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 import { QuestionCard } from "@/components/question-card";
 import PaginationComponent from "@/components/pagination";
 import Navbar from "@/components/navbar";
@@ -45,17 +45,10 @@ const mockQuestions = [
   },
 ];
 
-type FilterType = "newest" | "unanswered" | "popular" | "trending";
-
 export default function Dashboard() {
-  const [activeFilter, setActiveFilter] = useState<FilterType>("newest");
+  const [activeTab, setActiveTab] = useState("newest");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-
-  const handleFilterChange = (filter: FilterType) => {
-    setActiveFilter(filter);
-    setCurrentPage(1);
-  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,81 +62,83 @@ export default function Dashboard() {
       <Navbar />
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-6">
-        {/* Controls Bar */}
-        <div className="mb-6 space-y-4">
-          {/* Ask Question Button */}
-          <div className="flex justify-start">
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Ask New Question
-            </Button>
-          </div>
-
-          {/* Filters and Search */}
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-            {/* Filters */}
-            <div className="flex items-center space-x-2">
-              <Button
-                variant={activeFilter === "newest" ? "default" : "outline"}
-                onClick={() => handleFilterChange("newest")}
-                className="text-sm"
-              >
-                Newest
+      <div className="w-full px-4 py-6">
+        <div className="max-w-[775px] mx-auto">
+          {/* Controls Bar */}
+          <div className="mb-6 space-y-4">
+            {/* Ask Question Button and Search */}
+            <div className="flex justify-between items-center gap-4">
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Ask New Question
               </Button>
-              <Button
-                variant={activeFilter === "unanswered" ? "default" : "outline"}
-                onClick={() => handleFilterChange("unanswered")}
-                className="text-sm"
-              >
-                Unanswered
-              </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="text-sm">
-                    More
-                    <ChevronDown className="ml-2 h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem onClick={() => handleFilterChange("popular")}>
-                    Popular
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleFilterChange("trending")}>
-                    Trending
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              
+              {/* Search */}
+              <form onSubmit={handleSearch} className="flex-1 max-w-md">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                  <Input
+                    type="text"
+                    placeholder="Search"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 pr-4"
+                  />
+                </div>
+              </form>
             </div>
 
-            {/* Search */}
-            <form onSubmit={handleSearch} className="flex-1 max-w-md">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                <Input
-                  type="text"
-                  placeholder="Search"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4"
-                />
+            {/* Tabs */}
+            <div className="relative">
+              <div className="flex justify-start">
+                <Tabs defaultValue="newest" value={activeTab} onValueChange={setActiveTab}>
+                  <TabsList className="relative h-auto w-auto gap-0.5 bg-transparent p-0">
+                    <TabsTrigger
+                      value="newest"
+                      className="bg-muted overflow-hidden rounded-b-none border-x border-t py-2 data-[state=active]:z-10 data-[state=active]:shadow-none"
+                    >
+                      Newest
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="unanswered"
+                      className="bg-muted overflow-hidden rounded-b-none border-x border-t py-2 data-[state=active]:z-10 data-[state=active]:shadow-none"
+                    >
+                      Unanswered
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="popular"
+                      className="bg-muted overflow-hidden rounded-b-none border-x border-t py-2 data-[state=active]:z-10 data-[state=active]:shadow-none"
+                    >
+                      Popular
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="trending"
+                      className="bg-muted overflow-hidden rounded-b-none border-x border-t py-2 data-[state=active]:z-10 data-[state=active]:shadow-none"
+                    >
+                      Trending
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
               </div>
-            </form>
+              <div className="absolute bottom-0 left-0 right-0 h-px bg-border"></div>
+            </div>
           </div>
-        </div>
 
-        {/* Questions List */}
-        <div className="space-y-4 mb-8">
-          {mockQuestions.map((question) => (
-            <QuestionCard key={question.id} question={question} />
-          ))}
+          {/* Questions List */}
+          <div className="space-y-4 mb-8">
+            {mockQuestions.map((question) => (
+              <QuestionCard key={question.id} question={question} />
+            ))}
+          </div>
         </div>
 
         {/* Pagination */}
-        <PaginationComponent
-          currentPage={currentPage}
-          totalPages={7}
-        />
+        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-10">
+          <PaginationComponent
+            currentPage={currentPage}
+            totalPages={7}
+          />
+        </div>
       </div>
     </div>
   );
