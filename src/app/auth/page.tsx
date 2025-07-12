@@ -70,7 +70,12 @@ export default function AuthPage() {
       const result = await signUp({ name, email, password });
       // Store token in localStorage
       localStorage.setItem("authToken", result.token);
-      router.push("/dashboard");
+      console.log("Signup successful, redirecting to profile setup");
+      
+      // Small delay to ensure state updates, then redirect
+      setTimeout(() => {
+        window.location.href = "/profile-setup";
+      }, 100);
     } catch (error) {
       setError(error instanceof Error ? error.message : "Sign up failed");
     } finally {

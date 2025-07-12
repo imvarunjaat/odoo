@@ -109,3 +109,20 @@ export const signOut = mutation({
     return { success: true };
   },
 });
+
+export const updateProfile = mutation({
+  args: {
+    userId: v.id("users"),
+    image: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const { userId, image } = args;
+    
+    // Update the user's profile
+    await ctx.db.patch(userId, {
+      ...(image && { image }),
+    });
+
+    return { success: true };
+  },
+});
