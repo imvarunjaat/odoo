@@ -2,12 +2,12 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { Button } from "@/components/ui/button-component";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
+import { useImageUpload } from "@/hooks/useImageUpload";
 import { Camera, Upload } from "lucide-react";
 import { useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
@@ -19,6 +19,7 @@ export default function ProfileSetupPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const { user, isLoading: authLoading } = useAuth();
+  const { uploadImage, isUploading, error } = useImageUpload();
 
   const updateProfile = useMutation(api.auth.updateProfile);
 
@@ -38,10 +39,11 @@ export default function ProfileSetupPage() {
     );
   }
 
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setImageFile(file);
+      // Create a preview with FileReader
       const reader = new FileReader();
       reader.onload = (e) => {
         setSelectedImage(e.target?.result as string);
@@ -55,8 +57,7 @@ export default function ProfileSetupPage() {
     setIsLoading(true);
 
     try {
-      // For now, we'll save the base64 image data
-      // TODO: In production, upload to Convex file storage, Cloudinary, or AWS S3
+      // For now, we'll save the base64 image data as a temporary solution
       if (selectedImage) {
         await updateProfile({
           userId: user._id,
@@ -151,17 +152,24 @@ export default function ProfileSetupPage() {
             />
           </div>
 
+          {/* Error Display */}
+          {error && (
+            <div className="text-sm text-destructive text-center">
+              {error}
+            </div>
+          )}
+
           {/* Action Buttons */}
           <div className="flex flex-col gap-2 pt-4">
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Saving..." : "Complete Setup"}
+            <Button type="submit" className="w-full" disabled={isLoading || isUploading}>
+              {isLoading || isUploading ? "Saving..." : "Complete Setup"}
             </Button>
             <Button
               type="button"
               variant="ghost"
               onClick={handleSkip}
               className="w-full"
-              disabled={isLoading}
+              disabled={isLoading || isUploading}
             >
               Skip for now
             </Button>

@@ -33,7 +33,7 @@ export function useImageUpload(options: ImageUploadOptions = {}) {
       }
 
       // For now, we'll create a local URL for the image
-      // In production, this would upload to a cloud service like Cloudinary, AWS S3, etc.
+      // TODO: Implement proper Convex file storage after fixing the 500 errors
       const imageUrl = URL.createObjectURL(file);
       
       // Simulate upload delay
