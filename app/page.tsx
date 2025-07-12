@@ -1,103 +1,326 @@
-import Image from "next/image";
+"use client";
+
+import React, { useState } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
+import { 
+  ArrowUp, 
+  ArrowDown, 
+  MessageSquare, 
+  Eye, 
+  TrendingUp,
+  Clock,
+  Users,
+  BookOpen,
+  CheckCircle,
+  Plus
+} from "lucide-react";
+
+// Mock data for demonstration
+const questions = [
+  {
+    id: 1,
+    title: "How to implement authentication in Next.js 15 with App Router?",
+    content: "I'm trying to implement authentication in my Next.js 15 application using the new App Router. What's the best approach for handling protected routes?",
+    tags: ["nextjs", "authentication", "app-router", "react"],
+    author: {
+      name: "Rahul Sharma",
+      avatar: "/placeholder-avatar.jpg",
+      reputation: 2450
+    },
+    votes: 42,
+    answers: 8,
+    views: 1250,
+    createdAt: "2 hours ago",
+    hasAcceptedAnswer: true
+  },
+  {
+    id: 2,
+    title: "TypeScript generic constraints with React components",
+    content: "I'm struggling with TypeScript generic constraints when creating reusable React components. How can I properly type a component that accepts different prop types?",
+    tags: ["typescript", "react", "generics", "components"],
+    author: {
+      name: "Priya Patel",
+      avatar: "/placeholder-avatar.jpg",
+      reputation: 3200
+    },
+    votes: 28,
+    answers: 5,
+    views: 890,
+    createdAt: "4 hours ago",
+    hasAcceptedAnswer: false
+  },
+  {
+    id: 3,
+    title: "Best practices for state management in large React applications",
+    content: "What are the current best practices for managing state in large React applications? Should I use Context API, Redux, or something else?",
+    tags: ["react", "state-management", "redux", "context-api"],
+    author: {
+      name: "Arjun Singh",
+      avatar: "/placeholder-avatar.jpg",
+      reputation: 1800
+    },
+    votes: 67,
+    answers: 12,
+    views: 2340,
+    createdAt: "1 day ago",
+    hasAcceptedAnswer: true
+  },
+  {
+    id: 4,
+    title: "Optimizing database queries in Node.js with MongoDB",
+    content: "I'm experiencing slow database queries in my Node.js application using MongoDB. What are some optimization techniques I can implement?",
+    tags: ["nodejs", "mongodb", "database", "performance"],
+    author: {
+      name: "Kiran Kumar",
+      avatar: "/placeholder-avatar.jpg",
+      reputation: 4100
+    },
+    votes: 35,
+    answers: 7,
+    views: 1560,
+    createdAt: "2 days ago",
+    hasAcceptedAnswer: false
+  },
+  {
+    id: 5,
+    title: "CSS Grid vs Flexbox: When to use which?",
+    content: "I'm always confused about when to use CSS Grid versus Flexbox. Can someone explain the key differences and use cases?",
+    tags: ["css", "grid", "flexbox", "layout"],
+    author: {
+      name: "Sneha Reddy",
+      avatar: "/placeholder-avatar.jpg",
+      reputation: 2900
+    },
+    votes: 89,
+    answers: 15,
+    views: 4200,
+    createdAt: "3 days ago",
+    hasAcceptedAnswer: true
+  }
+];
+
+const stats = {
+  totalQuestions: 15420,
+  totalAnswers: 48920,
+  totalUsers: 3240,
+  questionsToday: 45
+};
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [filter, setFilter] = useState("latest");
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const getFilteredQuestions = () => {
+    switch (filter) {
+      case "popular":
+        return [...questions].sort((a, b) => b.votes - a.votes);
+      case "unanswered":
+        return questions.filter(q => q.answers === 0);
+      case "latest":
+      default:
+        return questions;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="container max-w-7xl mx-auto px-6 py-12">
+        {/* Hero Section */}
+        <div className="mb-20 text-center">
+          <div className="mb-8">
+            <h1 className="text-6xl md:text-7xl font-black mb-4 tracking-tight">
+              <span className="bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 bg-clip-text text-transparent">
+                Stack
+              </span>
+              <span className="text-white">It</span>
+            </h1>
+            <div className="h-1 w-24 bg-gradient-to-r from-orange-400 to-orange-600 mx-auto rounded-full"></div>
+          </div>
+          <p className="text-2xl font-light text-gray-300 mb-4 max-w-3xl mx-auto leading-relaxed">
+            The premier Q&A community for developers
+          </p>
+          <p className="text-lg text-gray-400 mb-12 max-w-2xl mx-auto">
+            Ask questions, share knowledge, and build amazing things together with thousands of developers worldwide.
+          </p>
+          <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6">
+            <Link href="/ask">
+              <Button size="lg" className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold px-10 py-5 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 text-lg group">
+                <Plus className="h-5 w-5 mr-3 group-hover:rotate-90 transition-transform duration-300" />
+                Ask Your First Question
+              </Button>
+            </Link>
+            <Button variant="outline" size="lg" className="border-2 border-gray-600 hover:border-orange-500 hover:bg-orange-500/10 text-gray-300 hover:text-white px-10 py-5 rounded-2xl text-lg font-semibold transition-all duration-300">
+              <BookOpen className="h-5 w-5 mr-3" />
+              Browse Questions
+            </Button>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+        {/* Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16">
+          <div className="glass-card p-8 rounded-2xl hover-lift text-center">
+            <div className="mb-4">
+              <div className="inline-flex p-4 bg-orange-500/20 rounded-2xl mb-4">
+                <BookOpen className="h-8 w-8 text-orange-400" />
+              </div>
+              <div className="text-4xl font-black text-white mb-2">{stats.totalQuestions.toLocaleString()}</div>
+              <div className="text-gray-400 font-medium uppercase tracking-wide text-sm">Questions</div>
+            </div>
+          </div>
+          <div className="glass-card p-8 rounded-2xl hover-lift text-center">
+            <div className="mb-4">
+              <div className="inline-flex p-4 bg-blue-500/20 rounded-2xl mb-4">
+                <MessageSquare className="h-8 w-8 text-blue-400" />
+              </div>
+              <div className="text-4xl font-black text-white mb-2">{stats.totalAnswers.toLocaleString()}</div>
+              <div className="text-gray-400 font-medium uppercase tracking-wide text-sm">Answers</div>
+            </div>
+          </div>
+          <div className="glass-card p-8 rounded-2xl hover-lift text-center">
+            <div className="mb-4">
+              <div className="inline-flex p-4 bg-green-500/20 rounded-2xl mb-4">
+                <Users className="h-8 w-8 text-green-400" />
+              </div>
+              <div className="text-4xl font-black text-white mb-2">{stats.totalUsers.toLocaleString()}</div>
+              <div className="text-gray-400 font-medium uppercase tracking-wide text-sm">Users</div>
+            </div>
+          </div>
+          <div className="glass-card p-8 rounded-2xl hover-lift text-center">
+            <div className="mb-4">
+              <div className="inline-flex p-4 bg-purple-500/20 rounded-2xl mb-4">
+                <TrendingUp className="h-8 w-8 text-purple-400" />
+              </div>
+              <div className="text-4xl font-black text-white mb-2">{stats.questionsToday}</div>
+              <div className="text-gray-400 font-medium uppercase tracking-wide text-sm">Today</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Section Header */}
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-white mb-2">Latest Questions</h2>
+          <p className="text-gray-400">Discover what the community is asking about</p>
+        </div>
+
+        {/* Filter Buttons */}
+        <div className="flex flex-wrap gap-4 mb-10">
+          <button
+            className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
+              filter === "latest" 
+                ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg" 
+                : "bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white"
+            }`}
+            onClick={() => setFilter("latest")}
+          >
+            <Clock className="h-4 w-4 mr-2 inline" />
+            Latest
+          </button>
+          <button
+            className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
+              filter === "popular" 
+                ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg" 
+                : "bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white"
+            }`}
+            onClick={() => setFilter("popular")}
+          >
+            <TrendingUp className="h-4 w-4 mr-2 inline" />
+            Popular
+          </button>
+          <button
+            className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
+              filter === "unanswered" 
+                ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg" 
+                : "bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white"
+            }`}
+            onClick={() => setFilter("unanswered")}
+          >
+            <MessageSquare className="h-4 w-4 mr-2 inline" />
+            Unanswered
+          </button>
+        </div>
+
+        {/* Questions List */}
+        <div className="space-y-8">
+          {getFilteredQuestions().map((question) => (
+            <div key={question.id} className="glass-card p-8 rounded-2xl hover-lift group">
+              <div className="flex items-start justify-between mb-6">
+                <div className="flex-1">
+                  <Link href={`/questions/${question.id}`} className="block">
+                    <h3 className="text-2xl font-bold text-white hover:text-orange-400 transition-colors line-clamp-2 group-hover:text-orange-400 mb-3">
+                      {question.title}
+                      {question.hasAcceptedAnswer && (
+                        <CheckCircle className="inline h-6 w-6 text-green-400 ml-3" />
+                      )}
+                    </h3>
+                  </Link>
+                  <p className="text-gray-300 text-base leading-relaxed line-clamp-2">
+                    {question.content}
+                  </p>
+                </div>
+              </div>
+              
+              {/* Tags */}
+              <div className="flex flex-wrap gap-3 mb-8">
+                {question.tags.map((tag) => (
+                  <span key={tag} className="bg-gray-800 text-green-400 border border-green-400/30 hover:bg-green-400/10 transition-colors px-4 py-2 rounded-full text-sm font-medium">
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+              
+              <div className="flex items-center justify-between">
+                {/* Stats */}
+                <div className="flex items-center gap-10">
+                  <div className="text-center">
+                    <div className="flex items-center gap-2 text-orange-400 font-bold text-lg">
+                      <ArrowUp className="h-5 w-5" />
+                      <span>{question.votes}</span>
+                    </div>
+                    <span className="text-gray-500 text-xs uppercase tracking-wide">Votes</span>
+                  </div>
+                  <div className="text-center">
+                    <div className="flex items-center gap-2 text-blue-400 font-bold text-lg">
+                      <MessageSquare className="h-5 w-5" />
+                      <span>{question.answers}</span>
+                    </div>
+                    <span className="text-gray-500 text-xs uppercase tracking-wide">Answers</span>
+                  </div>
+                  <div className="text-center">
+                    <div className="flex items-center gap-2 text-gray-400 font-bold text-lg">
+                      <Eye className="h-5 w-5" />
+                      <span>{question.views}</span>
+                    </div>
+                    <span className="text-gray-500 text-xs uppercase tracking-wide">Views</span>
+                  </div>
+                </div>
+
+                {/* Author */}
+                <div className="flex items-center gap-4">
+                  <Avatar className="h-12 w-12 border-2 border-orange-500/50">
+                    <AvatarImage src={question.author.avatar} alt={question.author.name} />
+                    <AvatarFallback className="bg-gray-800 text-white font-bold">{question.author.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <div className="font-bold text-white">{question.author.name}</div>
+                    <div className="text-gray-400 text-sm">{question.createdAt}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Load More */}
+        <div className="text-center mt-16">
+          <Button variant="outline" size="lg" className="border-2 border-gray-600 hover:border-orange-500 hover:bg-orange-500/10 text-gray-300 hover:text-white px-12 py-4 rounded-2xl text-lg font-bold transition-all duration-300">
+            Load More Questions
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
