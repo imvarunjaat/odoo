@@ -136,16 +136,6 @@ export default function QuestionDetail({ params }: { params: { id: string } }) {
               </div>
             </div>
 
-            {/* Answers Section */}
-            <div className="space-y-6">
-              <h2 className="text-xl font-semibold text-foreground">Answers</h2>
-              
-              {/* Placeholder for answers - will be implemented later */}
-              <div className="text-center py-8 text-muted-foreground">
-                <p>No answers yet. Be the first to answer this question!</p>
-              </div>
-            </div>
-
             {/* Submit Answer Form */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-foreground">Submit Your Answer</h3>
@@ -165,6 +155,16 @@ export default function QuestionDetail({ params }: { params: { id: string } }) {
                   </Button>
                 </div>
               </form>
+            </div>
+
+            {/* Answers Section */}
+            <div className="space-y-6">
+              <h2 className="text-xl font-semibold text-foreground">Answers</h2>
+              
+              {/* Placeholder for answers - will be implemented later */}
+              <div className="text-center py-8 text-muted-foreground">
+                <p>No answers yet. Be the first to answer this question!</p>
+              </div>
             </div>
 
           </div>
