@@ -1,3 +1,10 @@
+The env file we have used :
+# Deployment used by npx convex dev
+CONVEX_DEPLOYMENT=dev:rightful-stingray-480 # team: punit-singh, project: stackit
+
+NEXT_PUBLIC_CONVEX_URL=https://rightful-stingray-480.convex.cloud 
+
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
