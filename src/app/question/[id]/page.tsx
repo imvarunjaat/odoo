@@ -4,7 +4,8 @@ import { useState } from "react";
 import { HomeIcon, ChevronUp, ChevronDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge-component";
 import { Button } from "@/components/ui/button-component";
-import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
+import { useImageUpload } from "@/hooks/useImageUpload";
 import {
   Avatar,
   AvatarFallback,
@@ -50,6 +51,7 @@ const mockAnswers = [
 
 export default function QuestionDetail({ params }: { params: { id: string } }) {
   const [answer, setAnswer] = useState("");
+  const { uploadImage, isUploading } = useImageUpload();
 
   const handleSubmitAnswer = (e: React.FormEvent) => {
     e.preventDefault();
@@ -156,16 +158,17 @@ export default function QuestionDetail({ params }: { params: { id: string } }) {
               <h3 className="text-lg font-semibold text-foreground">Submit Your Answer</h3>
               
               <form onSubmit={handleSubmitAnswer} className="space-y-4">
-                <Textarea
-                  value={answer}
-                  onChange={(e) => setAnswer(e.target.value)}
-                  placeholder="Write your answer here..."
-                  className="min-h-[120px] resize-none"
+                <RichTextEditor
+                  content={answer}
+                  onChange={setAnswer}
+                  placeholder="Write your answer here... Use the toolbar to format your text, add links, images, and more."
+                  onImageUpload={uploadImage}
+                  className="min-h-[150px]"
                 />
                 
                 <div className="flex justify-end">
-                  <Button type="submit" disabled={!answer.trim()}>
-                    Submit
+                  <Button type="submit" disabled={!answer.trim() || isUploading}>
+                    {isUploading ? "Uploading..." : "Submit Answer"}
                   </Button>
                 </div>
               </form>

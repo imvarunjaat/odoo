@@ -6,7 +6,8 @@ import Navbar from "@/components/navbar";
 import { Button } from "@/components/ui/button-component";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
+import { useImageUpload } from "@/hooks/useImageUpload";
 
 export default function AskQuestionPage() {
   const router = useRouter();
@@ -16,10 +17,10 @@ export default function AskQuestionPage() {
     description: "",
     tags: "",
   });
+  const { uploadImage, isUploading } = useImageUpload();
 
   // Character counters
   const titleMaxLength = 200;
-  const descriptionMaxLength = 500;
   const maxTags = 5;
 
   const handleInputChange = (
@@ -29,11 +30,17 @@ export default function AskQuestionPage() {
     
     // Apply character limits
     if (name === "title" && value.length > titleMaxLength) return;
-    if (name === "description" && value.length > descriptionMaxLength) return;
     
     setFormData((prev) => ({
       ...prev,
       [name]: value,
+    }));
+  };
+
+  const handleDescriptionChange = (content: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      description: content,
     }));
   };
 
@@ -102,17 +109,15 @@ export default function AskQuestionPage() {
               <Label htmlFor="description" className="text-base font-medium">
                 Description <span className="text-destructive">*</span>
               </Label>
-              <Textarea
-                id="description"
-                name="description"
-                value={formData.description}
-                onChange={handleInputChange}
+              <RichTextEditor
+                content={formData.description}
+                onChange={handleDescriptionChange}
                 placeholder="Provide detailed information about your question. Include what you've tried, expected results, and any error messages."
-                className="min-h-[200px] resize-y"
-                required
+                onImageUpload={uploadImage}
+                className="min-h-[200px]"
               />
-              <div className="text-xs text-muted-foreground text-right">
-                {descriptionMaxLength - formData.description.length} characters remaining
+              <div className="text-xs text-muted-foreground">
+                Use the toolbar to format your text, add links, images, and more.
               </div>
             </div>
 
@@ -139,16 +144,16 @@ export default function AskQuestionPage() {
               <Button
                 type="submit"
                 className="px-8 py-6 text-base font-medium"
-                disabled={isSubmitting}
+                disabled={isSubmitting || isUploading}
               >
-                {isSubmitting ? "Submitting..." : "Submit Question"}
+                {isSubmitting ? "Submitting..." : isUploading ? "Uploading..." : "Submit Question"}
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 className="px-8 py-6 text-base font-medium"
                 onClick={handleCancel}
-                disabled={isSubmitting}
+                disabled={isSubmitting || isUploading}
               >
                 Cancel
               </Button>
