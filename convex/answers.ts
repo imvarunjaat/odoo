@@ -315,3 +315,111 @@ export const getUserVoteOnAnswer = query({
     return vote ? vote.type : null;
   },
 });
+
+export const addCommentToAnswer = mutation({
+  args: {
+    answerId: v.id("answers"),
+    content: v.string(),
+    authorToken: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // Verify the user is authenticated by checking their session
+    const session = await ctx.db
+      .query("sessions")
+      .withIndex("by_token", (q) => q.eq("token", args.authorToken))
+      .first();
+
+    if (!session || session.expiresAt < Date.now()) {
+      throw new Error("You must be logged in to comment");
+    }
+
+    // Validate content
+    if (!args.content.trim()) {
+      throw new Error("Comment content is required");
+    }
+
+    if (args.content.length > 500) {
+      throw new Error("Comment must be 500 characters or less");
+    }
+
+    // Verify the answer exists
+    const answer = await ctx.db.get(args.answerId);
+    if (!answer) {
+      throw new Error("Answer not found");
+    }
+
+    // Create the comment
+    const commentId = await ctx.db.insert("comments", {
+      content: args.content.trim(),
+      targetId: args.answerId,
+      targetType: "answer",
+      authorId: session.userId,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    });
+
+    return commentId;
+  },
+});
+
+export const getCommentsForAnswer = query({
+  args: {
+    answerId: v.id("answers"),
+  },
+  handler: async (ctx, args) => {
+    const comments = await ctx.db
+      .query("comments")
+      .withIndex("by_target", (q) => q.eq("targetId", args.answerId))
+      .order("asc") // Show oldest comments first
+      .collect();
+
+    // Get author information for each comment
+    const commentsWithAuthors = await Promise.all(
+      comments.map(async (comment) => {
+        const author = await ctx.db.get(comment.authorId);
+        return {
+          ...comment,
+          author: author ? {
+            _id: author._id,
+            name: author.name,
+            email: author.email,
+            image: author.image,
+          } : null,
+        };
+      })
+    );
+
+    return commentsWithAuthors;
+  },
+});
+
+export const deleteComment = mutation({
+  args: {
+    commentId: v.id("comments"),
+    authorToken: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // Verify the user is authenticated by checking their session
+    const session = await ctx.db
+      .query("sessions")
+      .withIndex("by_token", (q) => q.eq("token", args.authorToken))
+      .first();
+
+    if (!session || session.expiresAt < Date.now()) {
+      throw new Error("You must be logged in to delete a comment");
+    }
+
+    const comment = await ctx.db.get(args.commentId);
+    if (!comment) {
+      throw new Error("Comment not found");
+    }
+
+    if (comment.authorId !== session.userId) {
+      throw new Error("You can only delete your own comments");
+    }
+
+    await ctx.db.delete(args.commentId);
+
+    return args.commentId;
+  },
+});
