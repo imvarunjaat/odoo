@@ -1,13 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
-import { useParams } from "next/navigation";
+import React, { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
+import { useQuestions } from "@/lib/contexts/questions-context";
+import { useAuth } from "@/lib/contexts/auth-context";
 import { toast } from "sonner";
 import { 
   ArrowUp, 
@@ -22,484 +24,533 @@ import {
   Flag,
   MoreHorizontal,
   User,
-  Calendar
+  Calendar,
+  ArrowLeft,
+  Send,
+  Edit3
 } from "lucide-react";
 
-// Mock data for demonstration
-const questionData = {
-  id: 1,
-  title: "How to implement authentication in Next.js 15 with App Router?",
-  content: `I'm trying to implement authentication in my Next.js 15 application using the new App Router. I want to create protected routes and manage user sessions properly.
-
-Here's what I've tried so far:
-
-\`\`\`javascript
-// app/login/page.tsx
-export default function LoginPage() {
-  const handleLogin = async (email, password) => {
-    // How do I handle authentication here?
-  };
-  
-  return (
-    <form onSubmit={handleLogin}>
-      {/* Login form */}
-    </form>
-  );
-}
-\`\`\`
-
-What's the best approach for:
-1. Handling user authentication
-2. Creating protected routes
-3. Managing user sessions
-4. Redirecting users after login/logout
-
-I've looked at NextAuth.js but I'm not sure if it's the best choice for the new App Router. Any recommendations?`,
-  tags: ["nextjs", "authentication", "app-router", "react"],
-  author: {
-    name: "Rahul Sharma",
-    avatar: "/placeholder-avatar.jpg",
-    reputation: 2450,
-    joined: "2 years ago"
-  },
-  votes: 42,
-  views: 1250,
-  createdAt: "2 hours ago",
-  hasAcceptedAnswer: true
-};
-
-const answers = [
-  {
-    id: 1,
-    content: `Great question! For Next.js 15 with App Router, I recommend using NextAuth.js v5 (Auth.js). Here's a complete setup:
-
-## Installation
-
-\`\`\`bash
-npm install next-auth@beta
-\`\`\`
-
-## Configuration
-
-Create \`auth.ts\` in your project root:
-
-\`\`\`typescript
-import NextAuth from "next-auth"
-import { PrismaAdapter } from "@auth/prisma-adapter"
-import { prisma } from "./lib/prisma"
-import GoogleProvider from "next-auth/providers/google"
-
-export const { handlers, auth, signIn, signOut } = NextAuth({
-  adapter: PrismaAdapter(prisma),
-  providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    }),
-  ],
-})
-\`\`\`
-
-## Protected Routes
-
-Create a middleware.ts file:
-
-\`\`\`typescript
-import { auth } from "./auth"
-
-export default auth((req) => {
-  if (!req.auth && req.nextUrl.pathname !== "/login") {
-    const newUrl = new URL("/login", req.nextUrl.origin)
-    return Response.redirect(newUrl)
-  }
-})
-
-export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
-}
-\`\`\`
-
-This approach works perfectly with the App Router and provides excellent TypeScript support.`,
-    author: {
-      name: "Priya Patel",
-      avatar: "/placeholder-avatar.jpg",
-      reputation: 8950,
-      joined: "3 years ago"
-    },
-    votes: 28,
-    createdAt: "1 hour ago",
-    isAccepted: true,
-    comments: [
-      {
-        id: 1,
-        content: "This is exactly what I was looking for! The middleware approach is clean.",
-        author: {
-          name: "Rahul Sharma",
-          avatar: "/placeholder-avatar.jpg"
-        },
-        createdAt: "45 minutes ago"
-      },
-      {
-        id: 2,
-        content: "Does this work with database sessions as well?",
-        author: {
-          name: "Kiran Kumar",
-          avatar: "/placeholder-avatar.jpg"
-        },
-        createdAt: "30 minutes ago"
-      }
-    ]
-  },
-  {
-    id: 2,
-    content: `Another approach is to use Clerk, which provides excellent Next.js 15 support:
-
-\`\`\`bash
-npm install @clerk/nextjs
-\`\`\`
-
-Then wrap your app with ClerkProvider:
-
-\`\`\`typescript
-import { ClerkProvider } from '@clerk/nextjs'
-
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  return (
-    <ClerkProvider>
-      <html lang="en">
-        <body>{children}</body>
-      </html>
-    </ClerkProvider>
-  )
-}
-\`\`\`
-
-For protected routes, you can use the \`auth()\` helper:
-
-\`\`\`typescript
-import { auth } from "@clerk/nextjs/server"
-
-export default function ProtectedPage() {
-  const { userId } = auth()
-  
-  if (!userId) {
-    return <div>Please sign in</div>
-  }
-  
-  return <div>Protected content</div>
-}
-\`\`\`
-
-Clerk handles all the complexity for you and has great documentation.`,
-    author: {
-      name: "Arjun Singh",
-      avatar: "/placeholder-avatar.jpg",
-      reputation: 5200,
-      joined: "1 year ago"
-    },
-    votes: 15,
-    createdAt: "45 minutes ago",
-    isAccepted: false,
-    comments: []
-  }
-];
-
-export default function QuestionDetail() {
+export default function QuestionDetailPage() {
   const params = useParams();
-  const [userVote, setUserVote] = useState<'up' | 'down' | null>(null);
-  const [votes, setVotes] = useState(questionData.votes);
+  const router = useRouter();
+  const { 
+    getQuestionById, 
+    getAnswersByQuestionId, 
+    incrementViews,
+    voteQuestion,
+    voteAnswer,
+    acceptAnswer,
+    addAnswer,
+    addComment
+  } = useQuestions();
+  const { user, isAuthenticated } = useAuth();
+  
   const [newAnswer, setNewAnswer] = useState("");
-  const [showComments, setShowComments] = useState<{[key: number]: boolean}>({});
+  const [isSubmittingAnswer, setIsSubmittingAnswer] = useState(false);
+  const [newComment, setNewComment] = useState("");
+  const [commentingOnAnswer, setCommentingOnAnswer] = useState<string | null>(null);
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
 
-  const handleVote = (type: 'up' | 'down') => {
-    if (userVote === type) {
-      setUserVote(null);
-      setVotes(prev => prev + (type === 'up' ? -1 : 1));
-    } else {
-      const prevVote = userVote;
-      setUserVote(type);
+  const questionId = params.id as string;
+  const question = getQuestionById(questionId);
+  const answers = getAnswersByQuestionId(questionId);
+
+  useEffect(() => {
+    if (question) {
+      incrementViews(questionId);
+    }
+  }, [question, questionId, incrementViews]);
+
+  if (!question) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="glass-card p-8 rounded-2xl text-center">
+          <AlertCircle className="h-12 w-12 text-orange-400 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-white mb-2">Question Not Found</h2>
+          <p className="text-gray-400 mb-6">
+            The question you're looking for doesn't exist or has been removed.
+          </p>
+          <Button 
+            onClick={() => router.push('/')}
+            className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Go Back Home
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  const handleVoteQuestion = (voteType: 'up' | 'down') => {
+    if (!isAuthenticated) {
+      router.push('/login');
+      return;
+    }
+    voteQuestion(questionId, voteType);
+  };
+
+  const handleVoteAnswer = (answerId: string, voteType: 'up' | 'down') => {
+    if (!isAuthenticated) {
+      router.push('/login');
+      return;
+    }
+    voteAnswer(answerId, voteType);
+  };
+
+  const handleAcceptAnswer = (answerId: string) => {
+    if (!isAuthenticated) {
+      router.push('/login');
+      return;
+    }
+    
+    // Only question author can accept answers
+    if (user?.id !== question.author.id) {
+      toast.error("Only the question author can accept answers");
+      return;
+    }
+    
+    acceptAnswer(answerId);
+  };
+
+  const handleSubmitAnswer = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!isAuthenticated || !user) {
+      router.push('/login');
+      return;
+    }
+
+    if (!newAnswer.trim()) {
+      toast.error("Please enter your answer");
+      return;
+    }
+
+    setIsSubmittingAnswer(true);
+    
+    try {
+      addAnswer({
+        questionId,
+        content: newAnswer.trim(),
+        author: {
+          id: user.id,
+          name: user.name,
+          avatar: user.avatar,
+          reputation: user.reputation
+        }
+      });
       
-      if (prevVote === null) {
-        setVotes(prev => prev + (type === 'up' ? 1 : -1));
-      } else {
-        setVotes(prev => prev + (type === 'up' ? 2 : -2));
-      }
+      setNewAnswer("");
+      toast.success("Answer posted successfully!");
+    } catch (error) {
+      toast.error("Failed to post answer. Please try again.");
+    } finally {
+      setIsSubmittingAnswer(false);
     }
   };
 
-  const handleAnswerSubmit = (e: React.FormEvent) => {
+  const handleSubmitComment = async (e: React.FormEvent, answerId: string) => {
     e.preventDefault();
-    if (!newAnswer.trim()) return;
     
-    toast.success("Answer posted successfully!");
-    setNewAnswer("");
+    if (!isAuthenticated || !user) {
+      router.push('/login');
+      return;
+    }
+
+    if (!newComment.trim()) {
+      toast.error("Please enter your comment");
+      return;
+    }
+
+    setIsSubmittingComment(true);
+    
+    try {
+      addComment({
+        answerId,
+        content: newComment.trim(),
+        author: {
+          id: user.id,
+          name: user.name,
+          avatar: user.avatar,
+          reputation: user.reputation
+        }
+      });
+      
+      setNewComment("");
+      setCommentingOnAnswer(null);
+      toast.success("Comment added successfully!");
+    } catch (error) {
+      toast.error("Failed to add comment. Please try again.");
+    } finally {
+      setIsSubmittingComment(false);
+    }
   };
 
-  const toggleComments = (answerId: number) => {
-    setShowComments(prev => ({
-      ...prev,
-      [answerId]: !prev[answerId]
-    }));
+  const getInitials = (name: string) => {
+    return name.split(' ').map(word => word[0]).join('').toUpperCase();
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
-      <div className="grid gap-6 lg:grid-cols-4">
-        {/* Main Content */}
-        <div className="lg:col-span-3 space-y-6">
-          {/* Question */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-start gap-4">
-                {/* Voting */}
-                <div className="flex flex-col items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleVote('up')}
-                    className={`p-2 ${userVote === 'up' ? 'bg-primary text-primary-foreground' : ''}`}
-                  >
-                    <ArrowUp className="h-4 w-4" />
-                  </Button>
-                  <span className="text-lg font-bold">{votes}</span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleVote('down')}
-                    className={`p-2 ${userVote === 'down' ? 'bg-destructive text-destructive-foreground' : ''}`}
-                  >
-                    <ArrowDown className="h-4 w-4" />
-                  </Button>
+    <div className="min-h-screen bg-background">
+      <div className="container max-w-4xl mx-auto px-6 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <button
+            onClick={() => router.back()}
+            className="flex items-center text-gray-400 hover:text-white transition-colors mb-6"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Questions
+          </button>
+        </div>
+
+        {/* Question */}
+        <Card className="glass-card border-gray-700/50 mb-8">
+          <CardContent className="p-8">
+            <div className="flex items-start gap-6">
+              {/* Vote Section */}
+              <div className="flex flex-col items-center space-y-2 flex-shrink-0">
+                <button
+                  onClick={() => handleVoteQuestion('up')}
+                  className={`p-3 rounded-lg transition-all duration-300 ${
+                    question.userVote === 'up' 
+                      ? 'bg-orange-500/20 text-orange-400' 
+                      : 'hover:bg-gray-700/50 text-gray-400 hover:text-white'
+                  }`}
+                  title={isAuthenticated ? "Upvote" : "Login to vote"}
+                >
+                  <ArrowUp className="h-6 w-6" />
+                </button>
+                <span className={`text-2xl font-bold ${
+                  question.votes > 0 ? 'text-green-400' : 
+                  question.votes < 0 ? 'text-red-400' : 'text-gray-300'
+                }`}>
+                  {question.votes}
+                </span>
+                <button
+                  onClick={() => handleVoteQuestion('down')}
+                  className={`p-3 rounded-lg transition-all duration-300 ${
+                    question.userVote === 'down' 
+                      ? 'bg-red-500/20 text-red-400' 
+                      : 'hover:bg-gray-700/50 text-gray-400 hover:text-white'
+                  }`}
+                  title={isAuthenticated ? "Downvote" : "Login to vote"}
+                >
+                  <ArrowDown className="h-6 w-6" />
+                </button>
+              </div>
+
+              {/* Question Content */}
+              <div className="flex-1">
+                <div className="flex items-center justify-between mb-4">
+                  <h1 className="text-3xl font-black text-white">
+                    {question.title}
+                    {question.hasAcceptedAnswer && (
+                      <CheckCircle className="inline h-8 w-8 text-green-400 ml-3" />
+                    )}
+                  </h1>
                 </div>
 
-                {/* Question Content */}
-                <div className="flex-1">
-                  <h1 className="text-2xl font-bold mb-4">{questionData.title}</h1>
-                  <div className="prose max-w-none mb-4">
-                    <pre className="whitespace-pre-wrap text-sm">{questionData.content}</pre>
+                <div className="flex items-center gap-4 text-sm text-gray-400 mb-6">
+                  <span className="flex items-center">
+                    <Calendar className="h-4 w-4 mr-1" />
+                    Asked {question.createdAt}
+                  </span>
+                  <span className="flex items-center">
+                    <Eye className="h-4 w-4 mr-1" />
+                    {question.views} views
+                  </span>
+                  <span className="flex items-center">
+                    <MessageSquare className="h-4 w-4 mr-1" />
+                    {question.answers} answers
+                  </span>
+                </div>
+
+                <div className="prose prose-invert max-w-none mb-6">
+                  <div className="text-gray-300 leading-relaxed whitespace-pre-wrap">
+                    {question.content}
+                  </div>
+                </div>
+
+                {/* Tags */}
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {question.tags.map((tag) => (
+                    <Badge
+                      key={tag}
+                      variant="outline"
+                      className="bg-gray-800 text-green-400 border-green-400/30 hover:bg-green-400/10 px-3 py-1"
+                    >
+                      #{tag}
+                    </Badge>
+                  ))}
+                </div>
+
+                {/* Author Info */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={question.author.avatar} alt={question.author.name} />
+                      <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white font-bold">
+                        {getInitials(question.author.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="text-sm font-semibold text-white">{question.author.name}</div>
+                      <div className="text-xs text-gray-400">{question.author.reputation} reputation</div>
+                    </div>
                   </div>
                   
-                  {/* Tags */}
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {questionData.tags.map((tag) => (
-                      <Badge key={tag} variant="secondary">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-
-                  {/* Question Meta */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <Eye className="h-4 w-4" />
-                        <span>{questionData.views} views</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-4 w-4" />
-                        <span>asked {questionData.createdAt}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={questionData.author.avatar} alt={questionData.author.name} />
-                        <AvatarFallback>{questionData.author.name.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                      <div className="text-sm">
-                        <div className="font-medium">{questionData.author.name}</div>
-                        <div className="text-muted-foreground">{questionData.author.reputation} reputation</div>
-                      </div>
-                    </div>
+                  <div className="flex items-center gap-2">
+                    <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
+                      <Share className="h-4 w-4 mr-1" />
+                      Share
+                    </Button>
+                    <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
+                      <Bookmark className="h-4 w-4 mr-1" />
+                      Save
+                    </Button>
                   </div>
                 </div>
               </div>
-            </CardHeader>
-          </Card>
+            </div>
+          </CardContent>
+        </Card>
 
-          {/* Answers */}
-          <div className="space-y-4">
-            <h2 className="text-xl font-bold">
-              {answers.length} Answer{answers.length !== 1 ? 's' : ''}
+        {/* Answers Section */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-black text-white">
+              {answers.length} {answers.length === 1 ? 'Answer' : 'Answers'}
             </h2>
-            
+          </div>
+
+          {/* Answers List */}
+          <div className="space-y-6">
             {answers.map((answer) => (
-              <Card key={answer.id} className={answer.isAccepted ? 'border-secondary' : ''}>
-                <CardHeader>
-                  <div className="flex items-start gap-4">
-                    {/* Voting */}
-                    <div className="flex flex-col items-center gap-2">
-                      <Button variant="outline" size="sm" className="p-2">
-                        <ArrowUp className="h-4 w-4" />
-                      </Button>
-                      <span className="text-lg font-bold">{answer.votes}</span>
-                      <Button variant="outline" size="sm" className="p-2">
-                        <ArrowDown className="h-4 w-4" />
-                      </Button>
-                      {answer.isAccepted && (
-                        <CheckCircle className="h-5 w-5 text-secondary" />
+              <Card key={answer.id} className={`glass-card border-gray-700/50 ${
+                answer.isAccepted ? 'border-green-500/50 bg-green-500/5' : ''
+              }`}>
+                <CardContent className="p-8">
+                  <div className="flex items-start gap-6">
+                    {/* Vote Section */}
+                    <div className="flex flex-col items-center space-y-2 flex-shrink-0">
+                      <button
+                        onClick={() => handleVoteAnswer(answer.id, 'up')}
+                        className={`p-2 rounded-lg transition-all duration-300 ${
+                          answer.userVote === 'up' 
+                            ? 'bg-orange-500/20 text-orange-400' 
+                            : 'hover:bg-gray-700/50 text-gray-400 hover:text-white'
+                        }`}
+                        title={isAuthenticated ? "Upvote" : "Login to vote"}
+                      >
+                        <ArrowUp className="h-5 w-5" />
+                      </button>
+                      <span className={`text-lg font-bold ${
+                        answer.votes > 0 ? 'text-green-400' : 
+                        answer.votes < 0 ? 'text-red-400' : 'text-gray-300'
+                      }`}>
+                        {answer.votes}
+                      </span>
+                      <button
+                        onClick={() => handleVoteAnswer(answer.id, 'down')}
+                        className={`p-2 rounded-lg transition-all duration-300 ${
+                          answer.userVote === 'down' 
+                            ? 'bg-red-500/20 text-red-400' 
+                            : 'hover:bg-gray-700/50 text-gray-400 hover:text-white'
+                        }`}
+                        title={isAuthenticated ? "Downvote" : "Login to vote"}
+                      >
+                        <ArrowDown className="h-5 w-5" />
+                      </button>
+                      
+                      {/* Accept Button */}
+                      {isAuthenticated && user?.id === question.author.id && (
+                        <button
+                          onClick={() => handleAcceptAnswer(answer.id)}
+                          className={`p-2 rounded-lg transition-all duration-300 mt-2 ${
+                            answer.isAccepted 
+                              ? 'bg-green-500/20 text-green-400' 
+                              : 'hover:bg-gray-700/50 text-gray-400 hover:text-green-400'
+                          }`}
+                          title={answer.isAccepted ? "Unaccept answer" : "Accept answer"}
+                        >
+                          <CheckCircle className="h-5 w-5" />
+                        </button>
                       )}
                     </div>
 
                     {/* Answer Content */}
                     <div className="flex-1">
                       {answer.isAccepted && (
-                        <div className="flex items-center gap-2 mb-2">
-                          <CheckCircle className="h-4 w-4 text-secondary" />
-                          <span className="text-sm text-secondary font-medium">Accepted Answer</span>
+                        <div className="flex items-center gap-2 mb-4">
+                          <CheckCircle className="h-5 w-5 text-green-400" />
+                          <span className="text-sm font-semibold text-green-400">Accepted Answer</span>
                         </div>
                       )}
-                      
-                      <div className="prose max-w-none mb-4">
-                        <pre className="whitespace-pre-wrap text-sm">{answer.content}</pre>
+
+                      <div className="prose prose-invert max-w-none mb-6">
+                        <div className="text-gray-300 leading-relaxed whitespace-pre-wrap">
+                          {answer.content}
+                        </div>
                       </div>
 
-                      {/* Answer Meta */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => toggleComments(answer.id)}
-                            className="text-muted-foreground hover:text-foreground"
-                          >
-                            <MessageSquare className="h-4 w-4 mr-1" />
-                            {answer.comments.length} comments
-                          </Button>
-                          <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
-                            <Share className="h-4 w-4 mr-1" />
-                            Share
-                          </Button>
-                        </div>
-
-                        <div className="flex items-center gap-2">
+                      {/* Author Info */}
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-3">
                           <Avatar className="h-8 w-8">
                             <AvatarImage src={answer.author.avatar} alt={answer.author.name} />
-                            <AvatarFallback>{answer.author.name.charAt(0)}</AvatarFallback>
+                            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white font-bold">
+                              {getInitials(answer.author.name)}
+                            </AvatarFallback>
                           </Avatar>
-                          <div className="text-sm">
-                            <div className="font-medium">{answer.author.name}</div>
-                            <div className="text-muted-foreground">{answer.createdAt}</div>
+                          <div>
+                            <div className="text-sm font-semibold text-white">{answer.author.name}</div>
+                            <div className="text-xs text-gray-400">{answer.author.reputation} reputation</div>
                           </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                          <span>answered {answer.createdAt}</span>
                         </div>
                       </div>
 
                       {/* Comments */}
-                      {showComments[answer.id] && answer.comments.length > 0 && (
-                        <div className="mt-4 pl-4 border-l-2 border-muted space-y-2">
-                          {answer.comments.map((comment) => (
-                            <div key={comment.id} className="bg-muted/50 p-3 rounded-md">
-                              <p className="text-sm">{comment.content}</p>
-                              <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-                                <span>{comment.author.name}</span>
-                                <span>•</span>
-                                <span>{comment.createdAt}</span>
+                      {answer.comments.length > 0 && (
+                        <div className="border-t border-gray-700/50 pt-4">
+                          <div className="space-y-3">
+                            {answer.comments.map((comment) => (
+                              <div key={comment.id} className="flex items-start gap-3 text-sm">
+                                <Avatar className="h-6 w-6">
+                                  <AvatarImage src={comment.author.avatar} alt={comment.author.name} />
+                                  <AvatarFallback className="bg-gradient-to-br from-gray-500 to-gray-600 text-white text-xs">
+                                    {getInitials(comment.author.name)}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1">
+                                  <span className="text-gray-300">{comment.content}</span>
+                                  <span className="text-gray-500 ml-2">
+                                    – {comment.author.name} {comment.createdAt}
+                                  </span>
+                                </div>
                               </div>
-                            </div>
-                          ))}
+                            ))}
+                          </div>
                         </div>
                       )}
+
+                      {/* Add Comment */}
+                      <div className="mt-4">
+                        {commentingOnAnswer === answer.id ? (
+                          <form onSubmit={(e) => handleSubmitComment(e, answer.id)} className="flex gap-2">
+                            <input
+                              type="text"
+                              value={newComment}
+                              onChange={(e) => setNewComment(e.target.value)}
+                              placeholder="Add a comment..."
+                              className="flex-1 px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder:text-gray-400 focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50"
+                              disabled={isSubmittingComment}
+                            />
+                            <Button 
+                              type="submit" 
+                              size="sm" 
+                              disabled={isSubmittingComment}
+                              className="bg-orange-500 hover:bg-orange-600"
+                            >
+                              {isSubmittingComment ? (
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                              ) : (
+                                <Send className="h-4 w-4" />
+                              )}
+                            </Button>
+                            <Button 
+                              type="button" 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => {
+                                setCommentingOnAnswer(null);
+                                setNewComment("");
+                              }}
+                            >
+                              Cancel
+                            </Button>
+                          </form>
+                        ) : (
+                          <button
+                            onClick={() => {
+                              if (!isAuthenticated) {
+                                router.push('/login');
+                                return;
+                              }
+                              setCommentingOnAnswer(answer.id);
+                            }}
+                            className="text-sm text-gray-400 hover:text-white transition-colors"
+                          >
+                            Add a comment
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </CardHeader>
+                </CardContent>
               </Card>
             ))}
           </div>
+        </div>
 
-          {/* Answer Form */}
-          <Card>
+        {/* Answer Form */}
+        {isAuthenticated ? (
+          <Card className="glass-card border-gray-700/50">
             <CardHeader>
-              <h3 className="text-lg font-semibold">Your Answer</h3>
+              <h3 className="text-xl font-black text-white">Your Answer</h3>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleAnswerSubmit} className="space-y-4">
+              <form onSubmit={handleSubmitAnswer} className="space-y-4">
                 <Textarea
-                  placeholder="Write your answer here..."
                   value={newAnswer}
                   onChange={(e) => setNewAnswer(e.target.value)}
+                  placeholder="Write your answer here..."
+                  className="min-h-[200px] bg-gray-800 border-gray-600 text-white focus:border-orange-500 focus:ring-orange-500/50"
                   rows={8}
-                  className="min-h-[200px]"
                 />
-                <div className="flex gap-2">
-                  <Button type="submit" disabled={!newAnswer.trim()}>
-                    Post Answer
-                  </Button>
-                  <Button type="button" variant="outline">
-                    Preview
+                <div className="flex justify-end">
+                  <Button
+                    type="submit"
+                    disabled={isSubmittingAnswer}
+                    className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold px-6 py-3 rounded-xl"
+                  >
+                    {isSubmittingAnswer ? (
+                      <div className="flex items-center">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Posting...
+                      </div>
+                    ) : (
+                      <div className="flex items-center">
+                        <Send className="h-4 w-4 mr-2" />
+                        Post Answer
+                      </div>
+                    )}
                   </Button>
                 </div>
               </form>
             </CardContent>
           </Card>
-        </div>
-
-        {/* Sidebar */}
-        <div className="space-y-4">
-          {/* Question Stats */}
-          <Card>
-            <CardHeader>
-              <h3 className="font-semibold">Question Stats</h3>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">Asked {questionData.createdAt}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Eye className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">Viewed {questionData.views} times</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <ArrowUp className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">{votes} votes</span>
-              </div>
+        ) : (
+          <Card className="glass-card border-gray-700/50">
+            <CardContent className="p-8 text-center">
+              <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-white mb-2">Want to Answer?</h3>
+              <p className="text-gray-400 mb-6">
+                Sign in to post your answer and help the community.
+              </p>
+              <Button 
+                onClick={() => router.push('/login')}
+                className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold"
+              >
+                Sign In to Answer
+              </Button>
             </CardContent>
           </Card>
-
-          {/* Author Info */}
-          <Card>
-            <CardHeader>
-              <h3 className="font-semibold">Asked by</h3>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-3">
-                <Avatar className="h-12 w-12">
-                  <AvatarImage src={questionData.author.avatar} alt={questionData.author.name} />
-                  <AvatarFallback>{questionData.author.name.charAt(0)}</AvatarFallback>
-                </Avatar>
-                <div>
-                  <div className="font-medium">{questionData.author.name}</div>
-                  <div className="text-sm text-muted-foreground">{questionData.author.reputation} reputation</div>
-                  <div className="text-xs text-muted-foreground">Joined {questionData.author.joined}</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Related Questions */}
-          <Card>
-            <CardHeader>
-              <h3 className="font-semibold">Related Questions</h3>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <a href="#" className="block text-sm hover:text-primary">
-                  How to handle protected routes in Next.js 13?
-                </a>
-                <a href="#" className="block text-sm hover:text-primary">
-                  NextAuth.js vs Clerk for authentication
-                </a>
-                <a href="#" className="block text-sm hover:text-primary">
-                  Best practices for session management
-                </a>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        )}
       </div>
     </div>
   );

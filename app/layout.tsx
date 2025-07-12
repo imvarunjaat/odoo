@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import { AuthProvider } from "@/lib/contexts/auth-context";
+import { QuestionsProvider } from "@/lib/contexts/questions-context";
+import ErrorBoundary from "@/components/error-boundary";
 import Navbar from "@/components/navbar";
 
 const geistSans = Geist({
@@ -47,13 +50,19 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <div className="dark">
-          <Navbar />
-          <main className="min-h-screen">
-            {children}
-          </main>
-          <Toaster />
-        </div>
+        <ErrorBoundary>
+          <AuthProvider>
+            <QuestionsProvider>
+              <div className="dark">
+                <Navbar />
+                <main className="min-h-screen">
+                  {children}
+                </main>
+                <Toaster />
+              </div>
+            </QuestionsProvider>
+          </AuthProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );
