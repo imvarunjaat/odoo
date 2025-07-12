@@ -62,7 +62,7 @@ export default function QuestionDetailPage() {
   }, [question, questionId, incrementViews]);
 
   if (!question) {
-    return (
+  return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="glass-card p-8 rounded-2xl text-center">
           <AlertCircle className="h-12 w-12 text-orange-400 mx-auto mb-4" />
@@ -132,7 +132,7 @@ export default function QuestionDetailPage() {
       addAnswer({
         questionId,
         content: newAnswer.trim(),
-        author: {
+    author: {
           id: user.id,
           name: user.name,
           avatar: user.avatar,
@@ -204,7 +204,7 @@ export default function QuestionDetailPage() {
           </button>
         </div>
 
-        {/* Question */}
+          {/* Question */}
         <Card className="glass-card border-gray-700/50 mb-8">
           <CardContent className="p-8">
             <div className="flex items-start gap-6">
@@ -238,10 +238,10 @@ export default function QuestionDetailPage() {
                 >
                   <ArrowDown className="h-6 w-6" />
                 </button>
-              </div>
+                </div>
 
-              {/* Question Content */}
-              <div className="flex-1">
+                {/* Question Content */}
+                <div className="flex-1">
                 <div className="flex items-center justify-between mb-4">
                   <h1 className="text-3xl font-black text-white">
                     {question.title}
@@ -270,9 +270,9 @@ export default function QuestionDetailPage() {
                   <div className="text-gray-300 leading-relaxed whitespace-pre-wrap">
                     {question.content}
                   </div>
-                </div>
-
-                {/* Tags */}
+                  </div>
+                  
+                  {/* Tags */}
                 <div className="flex flex-wrap gap-2 mb-6">
                   {question.tags.map((tag) => (
                     <Badge
@@ -281,26 +281,26 @@ export default function QuestionDetailPage() {
                       className="bg-gray-800 text-green-400 border-green-400/30 hover:bg-green-400/10 px-3 py-1"
                     >
                       #{tag}
-                    </Badge>
-                  ))}
-                </div>
+                      </Badge>
+                    ))}
+                  </div>
 
                 {/* Author Info */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={question.author.avatar} alt={question.author.name} />
-                      <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white font-bold">
-                        {getInitials(question.author.name)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <div className="text-sm font-semibold text-white">{question.author.name}</div>
-                      <div className="text-xs text-gray-400">{question.author.reputation} reputation</div>
+                                    <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-10 w-10 border-2 border-orange-500/30">
+                        <AvatarImage src={question.author.avatar} alt={question.author.name} />
+                        <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white font-bold text-sm">
+                          {getInitials(question.author.name)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div className="text-sm font-semibold text-white">{question.author.name}</div>
+                        <div className="text-xs text-gray-400">{question.author.reputation} reputation</div>
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
+
+                    <div className="flex items-center gap-2">
                     <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
                       <Share className="h-4 w-4 mr-1" />
                       Share
@@ -314,7 +314,7 @@ export default function QuestionDetailPage() {
               </div>
             </div>
           </CardContent>
-        </Card>
+          </Card>
 
         {/* Answers Section */}
         <div className="mb-8">
@@ -323,7 +323,7 @@ export default function QuestionDetailPage() {
               {answers.length} {answers.length === 1 ? 'Answer' : 'Answers'}
             </h2>
           </div>
-
+            
           {/* Answers List */}
           <div className="space-y-6">
             {answers.map((answer) => (
@@ -387,7 +387,7 @@ export default function QuestionDetailPage() {
                           <span className="text-sm font-semibold text-green-400">Accepted Answer</span>
                         </div>
                       )}
-
+                      
                       <div className="prose prose-invert max-w-none mb-6">
                         <div className="text-gray-300 leading-relaxed whitespace-pre-wrap">
                           {answer.content}
@@ -397,9 +397,9 @@ export default function QuestionDetailPage() {
                       {/* Author Info */}
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
-                          <Avatar className="h-8 w-8">
+                          <Avatar className="h-8 w-8 border border-blue-500/30">
                             <AvatarImage src={answer.author.avatar} alt={answer.author.name} />
-                            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white font-bold">
+                            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white font-bold text-xs">
                               {getInitials(answer.author.name)}
                             </AvatarFallback>
                           </Avatar>
@@ -418,9 +418,9 @@ export default function QuestionDetailPage() {
                       {answer.comments.length > 0 && (
                         <div className="border-t border-gray-700/50 pt-4">
                           <div className="space-y-3">
-                            {answer.comments.map((comment) => (
+                                                      {answer.comments.map((comment) => (
                               <div key={comment.id} className="flex items-start gap-3 text-sm">
-                                <Avatar className="h-6 w-6">
+                                <Avatar className="h-6 w-6 border border-gray-500/30 flex-shrink-0">
                                   <AvatarImage src={comment.author.avatar} alt={comment.author.name} />
                                   <AvatarFallback className="bg-gradient-to-br from-gray-500 to-gray-600 text-white text-xs">
                                     {getInitials(comment.author.name)}
@@ -434,7 +434,7 @@ export default function QuestionDetailPage() {
                                 </div>
                               </div>
                             ))}
-                          </div>
+                            </div>
                         </div>
                       )}
 
@@ -495,9 +495,9 @@ export default function QuestionDetailPage() {
               </Card>
             ))}
           </div>
-        </div>
+          </div>
 
-        {/* Answer Form */}
+          {/* Answer Form */}
         {isAuthenticated ? (
           <Card className="glass-card border-gray-700/50">
             <CardHeader>
@@ -526,7 +526,7 @@ export default function QuestionDetailPage() {
                     ) : (
                       <div className="flex items-center">
                         <Send className="h-4 w-4 mr-2" />
-                        Post Answer
+                    Post Answer
                       </div>
                     )}
                   </Button>

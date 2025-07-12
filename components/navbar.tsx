@@ -96,12 +96,12 @@ export default function Navbar() {
 
           {/* Ask Question Button */}
           {isAuthenticated ? (
-            <Link href="/ask">
-              <Button className="hidden md:flex items-center space-x-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
-                <Plus className="h-5 w-5" />
-                <span>Ask Question</span>
-              </Button>
-            </Link>
+          <Link href="/ask">
+            <Button className="hidden md:flex items-center space-x-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
+              <Plus className="h-5 w-5" />
+              <span>Ask Question</span>
+            </Button>
+          </Link>
           ) : (
             <Link href="/login">
               <Button className="hidden md:flex items-center space-x-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
@@ -114,57 +114,57 @@ export default function Navbar() {
           {/* Notifications & User Menu */}
           {isAuthenticated && (
             <>
-              {/* Notifications */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
+          {/* Notifications */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="relative text-gray-400 hover:text-white hover:bg-gray-700/50 rounded-xl">
                     <Bell className="h-6 w-6" />
                     <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 text-xs bg-orange-500 text-white border-0 flex items-center justify-center">
                       {notifications.length}
                     </Badge>
-                  </Button>
-                </DropdownMenuTrigger>
+                </Button>
+              </DropdownMenuTrigger>
                 <DropdownMenuContent 
                   align="end" 
                   className="w-80 bg-gray-800 border-gray-700 text-white"
                 >
                   <div className="px-4 py-3 border-b border-gray-700">
                     <h4 className="font-semibold">Notifications</h4>
-                  </div>
+                </div>
                   <div className="max-h-80 overflow-y-auto">
-                    {notifications.map((notification) => (
+                {notifications.map((notification) => (
                       <DropdownMenuItem key={notification.id} className="px-4 py-3 hover:bg-gray-700/50">
                         <div className="flex flex-col space-y-1">
                           <p className="text-sm text-gray-300">{notification.message}</p>
                           <p className="text-xs text-gray-500">{notification.time}</p>
                         </div>
-                      </DropdownMenuItem>
-                    ))}
+                  </DropdownMenuItem>
+                ))}
                   </div>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-              {/* User Menu */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-12 w-12 rounded-xl hover:bg-gray-700/50">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={user?.avatar} alt={user?.name} />
-                      <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white font-bold">
-                        {user?.name ? getInitials(user.name) : 'U'}
-                      </AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
+          {/* User Menu */}
+            <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-12 w-12 rounded-xl hover:bg-gray-700/50 flex items-center justify-center">
+                  <Avatar className="h-10 w-10 border-2 border-orange-500/30 hover:border-orange-500/60 transition-all duration-300">
+                    <AvatarImage src={user?.avatar} alt={user?.name} />
+                    <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white font-bold text-sm">
+                      {user?.name ? getInitials(user.name) : 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
                 <DropdownMenuContent 
                   align="end" 
                   className="w-64 bg-gray-800 border-gray-700 text-white"
                 >
                   <div className="px-4 py-3 border-b border-gray-700">
                     <div className="flex items-center space-x-3">
-                      <Avatar className="h-10 w-10">
+                      <Avatar className="h-12 w-12 border-2 border-orange-500/30">
                         <AvatarImage src={user?.avatar} alt={user?.name} />
-                        <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white font-bold">
+                        <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white font-bold text-sm">
                           {user?.name ? getInitials(user.name) : 'U'}
                         </AvatarFallback>
                       </Avatar>
@@ -186,16 +186,16 @@ export default function Navbar() {
                   <DropdownMenuItem asChild>
                     <Link href="/profile" className="flex items-center px-4 py-2 hover:bg-gray-700/50">
                       <User className="h-4 w-4 mr-2" />
-                      <span>Profile</span>
+                  <span>Profile</span>
                     </Link>
-                  </DropdownMenuItem>
+                </DropdownMenuItem>
                   
                   <DropdownMenuItem asChild>
                     <Link href="/settings" className="flex items-center px-4 py-2 hover:bg-gray-700/50">
                       <Settings className="h-4 w-4 mr-2" />
-                      <span>Settings</span>
+                  <span>Settings</span>
                     </Link>
-                  </DropdownMenuItem>
+                </DropdownMenuItem>
                   
                   <DropdownMenuSeparator className="bg-gray-700" />
                   
@@ -205,9 +205,9 @@ export default function Navbar() {
                   >
                     <LogOut className="h-4 w-4 mr-2" />
                     <span>Logout</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             </>
           )}
 
@@ -217,7 +217,7 @@ export default function Navbar() {
               <Link href="/login">
                 <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
                   <User className="h-6 w-6" />
-                </Button>
+                  </Button>
               </Link>
             </div>
           )}

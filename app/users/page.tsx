@@ -64,21 +64,7 @@ const ReputationBadge: React.FC<{ rank: number }> = ({ rank }) => {
   return null;
 };
 
-// Component for user initials avatar
-const UserInitials: React.FC<{ name: string; size?: "sm" | "md" | "lg" }> = ({ name, size = "md" }) => {
-  const initials = name.split(' ').map(n => n[0]).join('').toUpperCase();
-  const sizeClasses = {
-    sm: "h-8 w-8 text-sm",
-    md: "h-16 w-16 text-lg",
-    lg: "h-20 w-20 text-xl"
-  };
-  
-  return (
-    <div className={`${sizeClasses[size]} rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 border-2 border-primary/30 flex items-center justify-center font-bold text-primary`}>
-      {initials}
-    </div>
-  );
-};
+
 
 // Mock data for users
 const usersData = [
@@ -363,14 +349,10 @@ export default function UsersPage() {
                 <ReputationBadge rank={userRank} />
                 <CardHeader className="pb-6 p-8">
                   <div className="flex items-center gap-6">
-                    <div className="relative">
-                      <Avatar className="h-20 w-20 ring-4 ring-primary/30 group-hover:ring-primary/60 transition-all duration-300">
-                        <AvatarImage src={user.avatar} alt={user.name} />
-                        <AvatarFallback className="sr-only">
-                          {user.name.split(' ').map(n => n[0]).join('')}
-                        </AvatarFallback>
-                      </Avatar>
-                      <UserInitials name={user.name} size="lg" />
+                    <div className="relative flex-shrink-0">
+                      <div className="h-20 w-20 rounded-full bg-gradient-to-br from-orange-500/20 to-orange-600/20 border-2 border-orange-500/30 flex items-center justify-center font-bold text-orange-400 text-xl group-hover:border-orange-500/60 transition-all duration-300 ring-4 ring-orange-500/20 group-hover:ring-orange-500/40">
+                        {user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                      </div>
                     </div>
                     <div className="flex-1">
                       <h3 className="font-black text-xl mb-2 group-hover:text-primary transition-colors">{user.name}</h3>

@@ -115,13 +115,15 @@ function Dashboard() {
               <CardHeader className="text-center pb-6">
                 <div className="flex justify-center mb-4">
                   <div className="relative">
-                    <Avatar className="h-24 w-24 border-4 border-orange-500/20">
+                    <Avatar className="h-24 w-24 border-4 border-orange-500/30 shadow-lg">
                       <AvatarImage src={user.avatar} alt={user.name} />
                       <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white text-2xl font-black">
                         {getInitials(user.name)}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="absolute -bottom-1 -right-1 bg-green-500 h-6 w-6 rounded-full border-2 border-background"></div>
+                    <div className="absolute -bottom-1 -right-1 bg-green-500 h-6 w-6 rounded-full border-2 border-background flex items-center justify-center">
+                      <div className="h-3 w-3 bg-green-400 rounded-full"></div>
+                    </div>
                   </div>
                 </div>
                 <CardTitle className="text-2xl font-black text-white mb-2">

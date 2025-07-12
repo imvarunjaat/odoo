@@ -82,12 +82,12 @@ export default function Home() {
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6">
             {isAuthenticated ? (
-              <Link href="/ask">
-                <Button size="lg" className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold px-10 py-5 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 text-lg group">
-                  <Plus className="h-5 w-5 mr-3 group-hover:rotate-90 transition-transform duration-300" />
-                  Ask Your First Question
-                </Button>
-              </Link>
+            <Link href="/ask">
+              <Button size="lg" className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold px-10 py-5 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 text-lg group">
+                <Plus className="h-5 w-5 mr-3 group-hover:rotate-90 transition-transform duration-300" />
+                Ask Your First Question
+              </Button>
+            </Link>
             ) : (
               <Link href="/login">
                 <Button size="lg" className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold px-10 py-5 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 text-lg group">
@@ -219,51 +219,51 @@ export default function Home() {
 
                 {/* Question Content */}
                 <div className="flex-1">
-                  <div className="flex items-start justify-between mb-6">
-                    <div className="flex-1">
-                      <Link href={`/questions/${question.id}`} className="block">
-                        <h3 className="text-2xl font-bold text-white hover:text-orange-400 transition-colors line-clamp-2 group-hover:text-orange-400 mb-3">
-                          {question.title}
-                          {question.hasAcceptedAnswer && (
-                            <CheckCircle className="inline h-6 w-6 text-green-400 ml-3" />
-                          )}
-                        </h3>
-                      </Link>
-                      <p className="text-gray-300 text-base leading-relaxed line-clamp-2">
-                        {question.content}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  {/* Tags */}
-                  <div className="flex flex-wrap gap-3 mb-8">
-                    {question.tags.map((tag) => (
-                      <span key={tag} className="bg-gray-800 text-green-400 border border-green-400/30 hover:bg-green-400/10 transition-colors px-4 py-2 rounded-full text-sm font-medium">
-                        #{tag}
-                      </span>
-                    ))}
-                  </div>
-                  
+              <div className="flex items-start justify-between mb-6">
+                <div className="flex-1">
+                  <Link href={`/questions/${question.id}`} className="block">
+                    <h3 className="text-2xl font-bold text-white hover:text-orange-400 transition-colors line-clamp-2 group-hover:text-orange-400 mb-3">
+                      {question.title}
+                      {question.hasAcceptedAnswer && (
+                        <CheckCircle className="inline h-6 w-6 text-green-400 ml-3" />
+                      )}
+                    </h3>
+                  </Link>
+                  <p className="text-gray-300 text-base leading-relaxed line-clamp-2">
+                    {question.content}
+                  </p>
+                </div>
+              </div>
+              
+              {/* Tags */}
+              <div className="flex flex-wrap gap-3 mb-8">
+                {question.tags.map((tag) => (
+                  <span key={tag} className="bg-gray-800 text-green-400 border border-green-400/30 hover:bg-green-400/10 transition-colors px-4 py-2 rounded-full text-sm font-medium">
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+              
                   {/* Bottom Section */}
-                  <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between">
                     <div className="flex items-center gap-8 text-gray-400">
                       <div className="flex items-center gap-2">
-                        <MessageSquare className="h-5 w-5" />
+                      <MessageSquare className="h-5 w-5" />
                         <span className="font-medium">{question.answers}</span>
                         <span className="text-sm">answers</span>
-                      </div>
+                    </div>
                       <div className="flex items-center gap-2">
-                        <Eye className="h-5 w-5" />
+                      <Eye className="h-5 w-5" />
                         <span className="font-medium">{question.views}</span>
                         <span className="text-sm">views</span>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-4">
+                  </div>
+                </div>
+
+                                    <div className="flex items-center gap-4">
                       <div className="flex items-center gap-3">
-                        <Avatar className="h-8 w-8">
+                        <Avatar className="h-8 w-8 border border-orange-500/30">
                           <AvatarImage src={question.author.avatar} alt={question.author.name} />
-                          <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white text-sm font-bold">
+                          <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white text-xs font-bold">
                             {getInitials(question.author.name)}
                           </AvatarFallback>
                         </Avatar>
@@ -299,11 +299,11 @@ export default function Home() {
                   <Button className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold">
                     <Plus className="h-4 w-4 mr-2" />
                     Ask Question
-                  </Button>
+          </Button>
                 </Link>
               )}
             </div>
-          </div>
+        </div>
         )}
       </div>
     </div>
