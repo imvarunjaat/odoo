@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Search, Plus } from "lucide-react";
+import { useState, useId } from "react";
+import { ArrowRight, Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button-component";
 import { Input } from "@/components/ui/input";
 import {
@@ -23,6 +23,7 @@ const mockQuestions = [
     tags: ["SQL", "Database"],
     author: "User Name",
     answers: 5,
+    score: 42,
     createdAt: new Date().toISOString(),
   },
   {
@@ -32,6 +33,7 @@ const mockQuestions = [
     tags: ["React", "JavaScript"],
     author: "User Name",
     answers: 3,
+    score: 18,
     createdAt: new Date().toISOString(),
   },
   {
@@ -41,6 +43,7 @@ const mockQuestions = [
     tags: ["Python", "Django"],
     author: "User Name",
     answers: 2,
+    score: 7,
     createdAt: new Date().toISOString(),
   },
 ];
@@ -49,6 +52,7 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("newest");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const searchId = useId();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,33 +61,43 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <Navbar />
 
       {/* Main Content */}
-      <div className="w-full px-4 py-6">
-        <div className="max-w-[775px] mx-auto">
+      <div className="w-full flex-1 flex justify-center">
+        <div className="max-w-[775px] w-full border-l border-r border-border">
           {/* Controls Bar */}
-          <div className="mb-6 space-y-4">
+          <div className="mb-6 space-y-4 px-4 pt-6">
             {/* Ask Question Button and Search */}
             <div className="flex justify-between items-center gap-4">
-              <Button>
+              <Button size="sm">
                 <Plus className="mr-2 h-4 w-4" />
                 Ask New Question
               </Button>
               
               {/* Search */}
-              <form onSubmit={handleSearch} className="flex-1 max-w-md">
+              <form onSubmit={handleSearch} className="w-72">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                   <Input
-                    type="text"
-                    placeholder="Search"
+                    id={searchId}
+                    className="peer ps-9 pe-9 h-9"
+                    placeholder="Search..."
+                    type="search"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 pr-4"
                   />
+                  <div className="text-muted-foreground/80 pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 peer-disabled:opacity-50">
+                    <Search size={16} />
+                  </div>
+                  <button
+                    className="text-muted-foreground/80 hover:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 absolute inset-y-0 end-0 flex h-full w-9 items-center justify-center rounded-e-md transition-[color,box-shadow] outline-none focus:z-10 focus-visible:ring-[3px] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
+                    aria-label="Submit search"
+                    type="submit"
+                  >
+                    <ArrowRight size={16} aria-hidden="true" />
+                  </button>
                 </div>
               </form>
             </div>
@@ -125,7 +139,7 @@ export default function Dashboard() {
           </div>
 
           {/* Questions List */}
-          <div className="space-y-4 mb-8">
+          <div className="mb-8">
             {mockQuestions.map((question) => (
               <QuestionCard key={question.id} question={question} />
             ))}

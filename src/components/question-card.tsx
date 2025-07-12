@@ -7,6 +7,7 @@ interface Question {
   tags: string[];
   author: string;
   answers: number;
+  score: number;
   createdAt: string;
 }
 
@@ -15,40 +16,50 @@ interface QuestionCardProps {
 }
 
 export function QuestionCard({ question }: QuestionCardProps) {
-  const truncateDescription = (text: string, maxLength: number = 150) => {
-    if (text.length <= maxLength) return text;
-    return text.slice(0, maxLength) + "...";
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    
+    if (diffInHours < 1) return "now";
+    if (diffInHours < 24) return `${diffInHours}h`;
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 30) return `${diffInDays}d`;
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
   return (
-    <div className="bg-card border border-border rounded-lg p-6 hover:shadow-md transition-all duration-200">
-      <div className="space-y-3">
-        {/* Question Title */}
-        <h3 className="text-lg font-semibold text-card-foreground hover:text-primary cursor-pointer line-clamp-2 transition-colors">
-          {question.title}
-        </h3>
-
-        {/* Question Description */}
-        <p className="text-muted-foreground text-sm leading-relaxed">
-          {truncateDescription(question.description)}
-        </p>
-
-        {/* Tags */}
-        <div className="flex flex-wrap gap-2">
-          {question.tags.map((tag) => (
-            <Badge key={tag} variant="secondary" className="text-xs">
-              {tag}
-            </Badge>
-          ))}
-        </div>
-
-        {/* Footer with author and answer count */}
-        <div className="flex items-center justify-between pt-3 border-t border-border">
-          <span className="text-sm text-muted-foreground font-medium">{question.author}</span>
-          <div className="flex items-center space-x-4">
-            <span className="text-sm text-muted-foreground font-medium">
-              {question.answers} ans
-            </span>
+    <div className="border-b border-border bg-card hover:bg-muted/20 transition-colors cursor-pointer">
+      <div className="px-6 py-5">
+        <div className="flex items-start gap-4">
+          <div className="min-w-0 flex-1">
+            <h3 className="text-lg font-semibold text-foreground leading-snug mb-2 hover:text-primary transition-colors">
+              {question.title}
+            </h3>
+            <p className="text-sm text-muted-foreground leading-normal mb-4 line-clamp-2">
+              {question.description}
+            </p>
+            
+            {/* Tags */}
+            <div className="flex flex-wrap gap-2 mb-3">
+              {question.tags.map((tag) => (
+                <Badge key={tag} variant="secondary" className="text-xs font-normal">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+            
+            {/* Footer */}
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <span className="font-medium">{question.author}</span>
+              <span>{formatTimeAgo(question.createdAt)}</span>
+            </div>
+          </div>
+          
+          {/* Answer count */}
+          <div className="text-center bg-muted/50 rounded-lg px-3 py-2 min-w-[60px]">
+            <div className="text-lg font-semibold text-foreground">{question.answers}</div>
+            <div className="text-xs text-muted-foreground">answers</div>
           </div>
         </div>
       </div>
