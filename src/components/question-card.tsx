@@ -1,4 +1,10 @@
 import { Badge } from "@/components/ui/badge-component";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar";
+import { useRouter } from "next/navigation";
 
 interface Question {
   id: string;
@@ -16,6 +22,12 @@ interface QuestionCardProps {
 }
 
 export function QuestionCard({ question }: QuestionCardProps) {
+  const router = useRouter();
+  
+  const handleQuestionClick = () => {
+    router.push(`/question/${question.id}`);
+  };
+
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -29,7 +41,7 @@ export function QuestionCard({ question }: QuestionCardProps) {
   };
 
   return (
-    <div className="border-b border-border bg-card hover:bg-muted/20 transition-colors cursor-pointer">
+    <div className="border-b border-border bg-card hover:bg-muted/20 transition-colors cursor-pointer" onClick={handleQuestionClick}>
       <div className="px-6 py-5">
         <div className="flex items-start gap-4">
           <div className="min-w-0 flex-1">
@@ -43,7 +55,7 @@ export function QuestionCard({ question }: QuestionCardProps) {
             {/* Tags */}
             <div className="flex flex-wrap gap-2 mb-3">
               {question.tags.map((tag) => (
-                <Badge key={tag} variant="secondary" className="text-xs font-normal">
+                <Badge key={tag} variant="outline" className="text-xs font-normal">
                   {tag}
                 </Badge>
               ))}
@@ -51,7 +63,15 @@ export function QuestionCard({ question }: QuestionCardProps) {
             
             {/* Footer */}
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              <span className="font-medium">{question.author}</span>
+              <div className="flex items-center gap-2">
+                <Avatar className="h-6 w-6">
+                  <AvatarImage src="" alt={question.author} />
+                  <AvatarFallback className="text-xs">
+                    {question.author.split(' ').map(n => n[0]).join('').toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="font-medium">{question.author}</span>
+              </div>
               <span>{formatTimeAgo(question.createdAt)}</span>
             </div>
           </div>
