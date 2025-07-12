@@ -20,44 +20,56 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import Navbar from "@/components/navbar";
-
-// Mock data for the question
-const mockQuestion = {
-  id: "1",
-  title: "How to join 2 columns in a data set to make a separate column in SQL",
-  description: "I do not know the code for it as I am a beginner. As an example what I need to do is like there is a column 1 containing First name, and column 2 consists of last name I want a column to combine...",
-  tags: ["SQL", "Database"],
-  author: "User Name",
-  score: 42,
-  createdAt: new Date().toISOString(),
-};
-
-const mockAnswers = [
-  {
-    id: "1",
-    content: "The || Operator.\nThe + Operator.\nThe CONCAT Function.",
-    author: "Expert User",
-    score: 15,
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "2", 
-    content: "Details",
-    author: "Another User",
-    score: 8,
-    createdAt: new Date().toISOString(),
-  },
-];
+import { useQuery } from "convex/react";
+import { api } from "../../../../convex/_generated/api";
+import { Id } from "../../../../convex/_generated/dataModel";
 
 export default function QuestionDetail({ params }: { params: { id: string } }) {
   const [answer, setAnswer] = useState("");
   const { uploadImage, isUploading } = useImageUpload();
+
+  // Fetch question data from Convex
+  const question = useQuery(api.questions.getQuestionById, {
+    questionId: params.id as Id<"questions">,
+  });
+
+  const isLoading = question === undefined;
 
   const handleSubmitAnswer = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Submitting answer:", answer);
     setAnswer("");
   };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <Navbar />
+        <div className="w-full flex-1 flex justify-center items-center">
+          <div className="text-muted-foreground">Loading question...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state (question not found)
+  if (!question) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <Navbar />
+        <div className="w-full flex-1 flex justify-center items-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold mb-2">Question Not Found</h1>
+            <p className="text-muted-foreground mb-4">The question you're looking for doesn't exist.</p>
+            <Button asChild>
+              <a href="/home">Go Back to Questions</a>
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -82,7 +94,7 @@ export default function QuestionDetail({ params }: { params: { id: string } }) {
                 </BreadcrumbItem>
                 <BreadcrumbSeparator> / </BreadcrumbSeparator>
                 <BreadcrumbItem>
-                  <BreadcrumbPage>{mockQuestion.title.substring(0, 30)}...</BreadcrumbPage>
+                  <BreadcrumbPage>{question.title.substring(0, 30)}...</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
@@ -90,67 +102,48 @@ export default function QuestionDetail({ params }: { params: { id: string } }) {
             {/* Question Section */}
             <div className="space-y-4">
               <h1 className="text-2xl font-bold text-foreground">
-                {mockQuestion.title}
+                {question.title}
               </h1>
               
               <div className="flex flex-wrap gap-2">
-                {mockQuestion.tags.map((tag) => (
+                {question.tags.map((tag) => (
                   <Badge key={tag} variant="outline" className="text-xs font-normal">
                     {tag}
                   </Badge>
                 ))}
               </div>
               
-              <p className="text-muted-foreground leading-relaxed">
-                {mockQuestion.description}
-              </p>
+              <div className="text-muted-foreground leading-relaxed" 
+                   dangerouslySetInnerHTML={{ __html: question.description }} />
+              
+              {/* Question metadata */}
+              <div className="flex items-center gap-4 text-sm text-muted-foreground pt-2 border-t">
+                <div className="flex items-center gap-2">
+                  <Avatar className="h-6 w-6">
+                    <AvatarImage src={question.author?.image} alt={question.author?.name} />
+                    <AvatarFallback className="text-xs">
+                      {question.author?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'A'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span>Asked by {question.author?.name || 'Anonymous'}</span>
+                </div>
+                <span>•</span>
+                <span>{new Date(question.createdAt).toLocaleDateString()}</span>
+                <span>•</span>
+                <span>{question.views} views</span>
+                <span>•</span>
+                <span>Score: {question.upvotes - question.downvotes}</span>
+              </div>
             </div>
 
             {/* Answers Section */}
             <div className="space-y-6">
               <h2 className="text-xl font-semibold text-foreground">Answers</h2>
               
-              {mockAnswers.map((answer, index) => (
-                <div key={answer.id} className="border-b border-border pb-6 last:border-b-0">
-                  <div className="flex items-start gap-4">
-                    {/* Vote Section */}
-                    <div className="flex flex-col items-center gap-2 pt-2">
-                      <button className="p-1 rounded hover:bg-muted transition-colors">
-                        <ChevronUp size={20} className="text-muted-foreground hover:text-foreground" />
-                      </button>
-                      <span className="text-lg font-semibold text-foreground min-w-[2rem] text-center">
-                        {answer.score}
-                      </span>
-                      <button className="p-1 rounded hover:bg-muted transition-colors">
-                        <ChevronDown size={20} className="text-muted-foreground hover:text-foreground" />
-                      </button>
-                    </div>
-
-                    {/* Answer Content */}
-                    <div className="flex-1 space-y-3">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <span className="font-semibold text-foreground">Answer {index + 1}</span>
-                      </div>
-                      
-                      <div className="text-foreground whitespace-pre-line">
-                        {answer.content}
-                      </div>
-                      
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <Avatar className="h-5 w-5">
-                          <AvatarImage src="" alt={answer.author} />
-                          <AvatarFallback className="text-xs">
-                            {answer.author.split(' ').map(n => n[0]).join('').toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span>{answer.author}</span>
-                        <span>•</span>
-                        <span>answered recently</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
+              {/* Placeholder for answers - will be implemented later */}
+              <div className="text-center py-8 text-muted-foreground">
+                <p>No answers yet. Be the first to answer this question!</p>
+              </div>
             </div>
 
             {/* Submit Answer Form */}
