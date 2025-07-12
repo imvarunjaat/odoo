@@ -5,9 +5,8 @@ export default defineSchema({
   users: defineTable({
     name: v.string(),
     email: v.string(),
+    passwordHash: v.string(),
     image: v.optional(v.string()),
-    role: v.union(v.literal("user"), v.literal("admin")),
-    reputation: v.number(),
     createdAt: v.number(),
   }).index("by_email", ["email"]),
 
@@ -86,4 +85,11 @@ export default defineSchema({
     questionCount: v.number(),
     createdAt: v.number(),
   }).index("by_name", ["name"]),
+
+  sessions: defineTable({
+    userId: v.id("users"),
+    token: v.string(),
+    expiresAt: v.number(),
+    createdAt: v.number(),
+  }).index("by_token", ["token"]),
 });
