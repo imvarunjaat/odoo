@@ -8,11 +8,17 @@ import { Button } from "@/components/ui/button-component";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { useAction } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 
 export default function AuthPage() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("signin");
+  const [error, setError] = useState<string | null>(null);
+  
+  const signUp = useAction(api.auth.signUp);
+  const signIn = useAction(api.auth.signIn);
   
   // Check URL params for tab selection
   useEffect(() => {
@@ -25,23 +31,56 @@ export default function AuthPage() {
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
     
-    // This would be replaced with actual authentication logic
-    setTimeout(() => {
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    
+    try {
+      const result = await signIn({ email, password });
+      // Store token in localStorage
+      localStorage.setItem("authToken", result.token);
+      router.push("/home");
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Sign in failed");
+    } finally {
       setIsLoading(false);
-      router.push("/dashboard");
-    }, 1000);
+    }
   };
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
     
-    // This would be replaced with actual registration logic
-    setTimeout(() => {
+    const formData = new FormData(e.currentTarget);
+    const name = formData.get("name") as string;
+    const email = formData.get("signup-email") as string;
+    const password = formData.get("signup-password") as string;
+    const confirmPassword = formData.get("confirm-password") as string;
+    
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
       setIsLoading(false);
-      router.push("/dashboard");
-    }, 1000);
+      return;
+    }
+    
+    try {
+      const result = await signUp({ name, email, password });
+      // Store token in localStorage
+      localStorage.setItem("authToken", result.token);
+      console.log("Signup successful, redirecting to profile setup");
+      
+      // Small delay to ensure state updates, then redirect
+      setTimeout(() => {
+        window.location.href = "/profile-setup";
+      }, 100);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Sign up failed");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -66,6 +105,12 @@ export default function AuthPage() {
           </p>
         </div>
 
+        {error && (
+          <div className="bg-destructive/10 border border-destructive text-destructive px-4 py-3 rounded-md text-sm">
+            {error}
+          </div>
+        )}
+        
         <Tabs 
           defaultValue="signin" 
           value={activeTab} 
@@ -85,6 +130,7 @@ export default function AuthPage() {
                     <Label htmlFor="email">Email</Label>
                     <Input
                       id="email"
+                      name="email"
                       placeholder="name@example.com"
                       type="email"
                       autoCapitalize="none"
@@ -106,6 +152,7 @@ export default function AuthPage() {
                     </div>
                     <Input
                       id="password"
+                      name="password"
                       type="password"
                       autoCapitalize="none"
                       autoComplete="current-password"
@@ -152,6 +199,7 @@ export default function AuthPage() {
                   <Label htmlFor="name">Full Name</Label>
                   <Input
                     id="name"
+                    name="name"
                     placeholder="John Doe"
                     type="text"
                     autoCapitalize="words"
@@ -165,6 +213,7 @@ export default function AuthPage() {
                   <Label htmlFor="signup-email">Email</Label>
                   <Input
                     id="signup-email"
+                    name="signup-email"
                     placeholder="name@example.com"
                     type="email"
                     autoCapitalize="none"
@@ -178,6 +227,7 @@ export default function AuthPage() {
                   <Label htmlFor="signup-password">Password</Label>
                   <Input
                     id="signup-password"
+                    name="signup-password"
                     type="password"
                     autoCapitalize="none"
                     autoComplete="new-password"
@@ -189,6 +239,7 @@ export default function AuthPage() {
                   <Label htmlFor="confirm-password">Confirm Password</Label>
                   <Input
                     id="confirm-password"
+                    name="confirm-password"
                     type="password"
                     autoCapitalize="none"
                     autoComplete="new-password"
