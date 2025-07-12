@@ -41,7 +41,7 @@ export default function AuthPage() {
       const result = await signIn({ email, password });
       // Store token in localStorage
       localStorage.setItem("authToken", result.token);
-      router.push("/dashboard");
+      router.push("/home");
     } catch (error) {
       setError(error instanceof Error ? error.message : "Sign in failed");
     } finally {

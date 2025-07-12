@@ -71,14 +71,14 @@ export default function QuestionDetail({ params }: { params: { id: string } }) {
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
-                  <BreadcrumbLink href="/dashboard">
+                  <BreadcrumbLink href="/home">
                     <HomeIcon size={16} aria-hidden="true" />
                     <span className="sr-only">Home</span>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator> / </BreadcrumbSeparator>
                 <BreadcrumbItem>
-                  <BreadcrumbLink href="/dashboard">Questions</BreadcrumbLink>
+                  <BreadcrumbLink href="/home">Questions</BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator> / </BreadcrumbSeparator>
                 <BreadcrumbItem>

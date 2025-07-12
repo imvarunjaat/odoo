@@ -64,7 +64,7 @@ export default function ProfileSetupPage() {
         });
       }
       
-      router.push("/dashboard");
+      router.push("/home");
     } catch (error) {
       console.error("Profile update failed:", error);
     } finally {
@@ -73,7 +73,7 @@ export default function ProfileSetupPage() {
   };
 
   const handleSkip = () => {
-    router.push("/dashboard");
+    router.push("/home");
   };
 
   const initials = user.name

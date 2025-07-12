@@ -13,46 +13,34 @@ import {
 import { QuestionCard } from "@/components/question-card";
 import PaginationComponent from "@/components/pagination";
 import Navbar from "@/components/navbar";
+import { useQuery } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 
-// Mock data for development
-const mockQuestions = [
-  {
-    id: "1",
-    title: "How to join 2 columns in a data set to make a separate column in SQL",
-    description: "I do not know the code for it as I am a beginner. As an example what I need to do is like there is a column 1 containing First name, and column 2 consists of last name I want a column to combine...",
-    tags: ["SQL", "Database"],
-    author: "User Name",
-    answers: 5,
-    score: 42,
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "2",
-    title: "Question.....",
-    description: "Descriptions....",
-    tags: ["React", "JavaScript"],
-    author: "User Name",
-    answers: 3,
-    score: 18,
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "3",
-    title: "Question.....",
-    description: "Descriptions....",
-    tags: ["Python", "Django"],
-    author: "User Name",
-    answers: 2,
-    score: 7,
-    createdAt: new Date().toISOString(),
-  },
-];
-
-export default function Dashboard() {
+export default function HomePage() {
   const [activeTab, setActiveTab] = useState("newest");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const searchId = useId();
+
+  // Fetch questions from Convex
+  const questionsData = useQuery(api.questions.getQuestions, {
+    limit: 20,
+    offset: (currentPage - 1) * 20,
+  });
+
+  // Transform Convex data to match QuestionCard format
+  const questions = questionsData?.questions?.map((q) => ({
+    id: q._id,
+    title: q.title,
+    description: q.description,
+    tags: q.tags,
+    author: q.author?.name || "Anonymous",
+    answers: 0, // We'll implement answer counting later
+    score: q.upvotes - q.downvotes,
+    createdAt: new Date(q.createdAt).toISOString(),
+  })) || [];
+
+  const isLoading = questionsData === undefined;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -142,9 +130,25 @@ export default function Dashboard() {
 
           {/* Questions List */}
           <div className="mb-8">
-            {mockQuestions.map((question) => (
-              <QuestionCard key={question.id} question={question} />
-            ))}
+            {isLoading ? (
+              <div className="flex justify-center items-center py-12">
+                <div className="text-muted-foreground">Loading questions...</div>
+              </div>
+            ) : questions.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <div className="text-muted-foreground mb-4">No questions found</div>
+                <Button asChild size="sm">
+                  <a href="/ask-question">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Ask the First Question
+                  </a>
+                </Button>
+              </div>
+            ) : (
+              questions.map((question) => (
+                <QuestionCard key={question.id} question={question} />
+              ))
+            )}
           </div>
         </div>
 
