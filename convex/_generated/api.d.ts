@@ -16,6 +16,7 @@ import type {
 import type * as answers from "../answers.js";
 import type * as auth from "../auth.js";
 import type * as authHelpers from "../authHelpers.js";
+import type * as notifications from "../notifications.js";
 import type * as questions from "../questions.js";
 
 /**
@@ -30,6 +31,7 @@ declare const fullApi: ApiFromModules<{
   answers: typeof answers;
   auth: typeof auth;
   authHelpers: typeof authHelpers;
+  notifications: typeof notifications;
   questions: typeof questions;
 }>;
 export declare const api: FilterApi<

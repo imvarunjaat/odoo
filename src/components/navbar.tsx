@@ -4,8 +4,9 @@ import Logo from "@/components/logo"
 import { Button } from "@/components/ui/button-component"
 import ThemeSwitch from "@/components/theme-switch"
 import UserMenu from "@/components/user-menu"
+import { NotificationsDropdown } from "@/components/notifications-dropdown"
 import { useAuth } from "@/hooks/useAuth"
-import { Bell, HelpCircle } from "lucide-react"
+import { HelpCircle } from "lucide-react"
 
 export default function Navbar() {
   const { user, isLoading } = useAuth();
@@ -38,9 +39,7 @@ export default function Navbar() {
                         <HelpCircle className="h-4 w-4" />
                       </Button>
                       {/* Notification */}
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <Bell className="h-4 w-4" />
-                      </Button>
+                      <NotificationsDropdown />
                     </div>
                     {/* User menu */}
                     <UserMenu />

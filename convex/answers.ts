@@ -41,6 +41,20 @@ export const createAnswer = mutation({
       updatedAt: Date.now(),
     });
 
+    // Create notification for question author
+    const question = await ctx.db.get(args.questionId);
+    if (question && question.authorId !== session.userId) {
+      await ctx.db.insert("notifications", {
+        userId: question.authorId,
+        type: "answer",
+        title: "New Answer",
+        message: `${user.name} answered your question: "${question.title}"`,
+        relatedId: args.questionId,
+        isRead: false,
+        createdAt: Date.now(),
+      });
+    }
+
     return answerId;
   },
 });
@@ -190,6 +204,22 @@ export const acceptAnswer = mutation({
     // Update the question's acceptedAnswerId
     await ctx.db.patch(answer.questionId, { acceptedAnswerId: args.answerId });
 
+    // Create notification for answer author (don't notify if accepting own answer)
+    if (answer.authorId !== session.userId) {
+      const question = await ctx.db.get(answer.questionId);
+      const questionTitle = question ? question.title : "a question";
+      
+      await ctx.db.insert("notifications", {
+        userId: answer.authorId,
+        type: "accepted_answer",
+        title: "Answer Accepted",
+        message: `Your answer to "${questionTitle}" was accepted!`,
+        relatedId: args.answerId,
+        isRead: false,
+        createdAt: Date.now(),
+      });
+    }
+
     return args.answerId;
   },
 });
@@ -260,6 +290,25 @@ export const voteOnAnswer = mutation({
             upvotes: Math.max(0, answer.upvotes - 1),
           });
         }
+
+        // Create notification for answer author (don't notify if voting on own answer)
+        if (answer.authorId !== session.userId) {
+          const voter = await ctx.db.get(session.userId);
+          const question = await ctx.db.get(answer.questionId);
+          const questionTitle = question ? question.title : "your answer";
+          
+          if (voter) {
+            await ctx.db.insert("notifications", {
+              userId: answer.authorId,
+              type: args.voteType,
+              title: args.voteType === "upvote" ? "Answer Upvoted" : "Answer Downvoted",
+              message: `${voter.name} ${args.voteType === "upvote" ? "upvoted" : "downvoted"} your answer to: "${questionTitle}"`,
+              relatedId: args.answerId,
+              isRead: false,
+              createdAt: Date.now(),
+            });
+          }
+        }
         
         return { action: "updated", voteType: args.voteType };
       }
@@ -282,6 +331,25 @@ export const voteOnAnswer = mutation({
         await ctx.db.patch(args.answerId, {
           downvotes: answer.downvotes + 1,
         });
+      }
+
+      // Create notification for answer author (don't notify if voting on own answer)
+      if (answer.authorId !== session.userId) {
+        const voter = await ctx.db.get(session.userId);
+        const question = await ctx.db.get(answer.questionId);
+        const questionTitle = question ? question.title : "your answer";
+        
+        if (voter) {
+          await ctx.db.insert("notifications", {
+            userId: answer.authorId,
+            type: args.voteType,
+            title: args.voteType === "upvote" ? "Answer Upvoted" : "Answer Downvoted",
+            message: `${voter.name} ${args.voteType === "upvote" ? "upvoted" : "downvoted"} your answer to: "${questionTitle}"`,
+            relatedId: args.answerId,
+            isRead: false,
+            createdAt: Date.now(),
+          });
+        }
       }
       
       return { action: "added", voteType: args.voteType };
@@ -357,6 +425,23 @@ export const addCommentToAnswer = mutation({
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });
+
+    // Create notification for answer author (don't notify if commenting on own answer)
+    const commenter = await ctx.db.get(session.userId);
+    if (commenter && answer.authorId !== session.userId) {
+      const question = await ctx.db.get(answer.questionId);
+      const questionTitle = question ? question.title : "your answer";
+      
+      await ctx.db.insert("notifications", {
+        userId: answer.authorId,
+        type: "comment",
+        title: "New Comment",
+        message: `${commenter.name} commented on your answer to: "${questionTitle}"`,
+        relatedId: args.answerId,
+        isRead: false,
+        createdAt: Date.now(),
+      });
+    }
 
     return commentId;
   },

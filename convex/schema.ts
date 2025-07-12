@@ -67,7 +67,9 @@ export default defineSchema({
       v.literal("answer"),
       v.literal("comment"),
       v.literal("mention"),
-      v.literal("accepted_answer")
+      v.literal("accepted_answer"),
+      v.literal("upvote"),
+      v.literal("downvote")
     ),
     title: v.string(),
     message: v.string(),
